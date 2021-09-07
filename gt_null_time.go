@@ -243,7 +243,11 @@ func (self *NullTime) Scan(src interface{}) error {
 	}
 }
 
-// Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+/*
+Implement `fmt.GoStringer`, returning Go code that constructs this value. For
+UTC, the resulting code is valid. For non-UTC, the resulting code is invalid,
+because `*time.Location` doesn't implement `fmt.GoStringer`.
+*/
 func (self NullTime) GoString() string {
 	year, month, day := self.Date()
 	hour, min, sec, nsec := self.Hour(), self.Minute(), self.Second(), self.Nanosecond()
@@ -253,13 +257,13 @@ func (self NullTime) GoString() string {
 		if loc == time.UTC {
 			return fmt.Sprintf(`gt.NullDateUTC(%v, %v, %v)`, year, int(month), day)
 		}
-		return fmt.Sprintf(`gt.NullDateIn(%v, %v, %v, %v)`, year, int(month), day, loc)
+		return fmt.Sprintf(`gt.NullDateIn(%v, %v, %v, %q)`, year, int(month), day, loc)
 	}
 
 	if loc == time.UTC {
 		return fmt.Sprintf(`gt.NullTimeUTC(%v, %v, %v, %v, %v, %v, %v)`, year, int(month), day, hour, min, sec, nsec)
 	}
-	return fmt.Sprintf(`gt.NullTimeIn(%v, %v, %v, %v, %v, %v, %v, %v)`, year, int(month), day, hour, min, sec, nsec, loc)
+	return fmt.Sprintf(`gt.NullTimeIn(%v, %v, %v, %v, %v, %v, %v, %q)`, year, int(month), day, hour, min, sec, nsec, loc)
 }
 
 // Free cast to `time.Time`.
