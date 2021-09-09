@@ -143,7 +143,7 @@ func (self *Uuid) UnmarshalJSON(src []byte) error {
 func (self Uuid) Value() (driver.Value, error) { return self.Get(), nil }
 
 /*
-Implement `sql.Scanner`, converting an arbitrary input to `gt.Interval` and
+Implement `sql.Scanner`, converting an arbitrary input to `gt.Uuid` and
 modifying the receiver. Acceptable inputs:
 
 	* `string`          -> use `.Parse`

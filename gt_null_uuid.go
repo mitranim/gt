@@ -141,7 +141,7 @@ func (self NullUuid) Value() (driver.Value, error) {
 }
 
 /*
-Implement `sql.Scanner`, converting an arbitrary input to `gt.Interval` and
+Implement `sql.Scanner`, converting an arbitrary input to `gt.NullUuid` and
 modifying the receiver. Acceptable inputs:
 
 	* `nil`             -> use `.Zero`

@@ -146,7 +146,7 @@ func (self NullInt) Value() (driver.Value, error) {
 }
 
 /*
-Implement `sql.Scanner`, converting an arbitrary input to `gt.Float` and
+Implement `sql.Scanner`, converting an arbitrary input to `gt.NullInt` and
 modifying the receiver. Acceptable inputs:
 
 	* `nil`         -> use `.Zero`

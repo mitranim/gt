@@ -190,7 +190,7 @@ func (self NullTime) Value() (driver.Value, error) {
 }
 
 /*
-Implement `sql.Scanner`, converting an arbitrary input to `gt.Date` and
+Implement `sql.Scanner`, converting an arbitrary input to `gt.NullTime` and
 modifying the receiver. Acceptable inputs:
 
 	* `nil`         -> use `.Zero`

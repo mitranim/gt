@@ -113,7 +113,7 @@ func (self *NullString) UnmarshalJSON(src []byte) error {
 func (self NullString) Value() (driver.Value, error) { return self.Get(), nil }
 
 /*
-Implement `sql.Scanner`, converting an arbitrary input to `gt.Float` and
+Implement `sql.Scanner`, converting an arbitrary input to `gt.NullString` and
 modifying the receiver. Acceptable inputs:
 
 	* `nil`         -> use `.Zero`

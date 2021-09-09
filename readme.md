@@ -17,7 +17,7 @@ API docs: https://pkg.go.dev/github.com/mitranim/gt
 
 Important features:
 
-Implements all relevant encoding/decoding interfaces for text, JSON, and SQL. Types can be seamlessly used for database fields, JSON fields, and so on, without the need for manual conversions.
+All types implement all relevant encoding/decoding interfaces for text, JSON, and SQL. Types can be seamlessly used for database fields, JSON fields, and so on, without the need for manual conversions.
 
 All "nullable" `gt` types are type aliases of "normal" types, where the zero value of the normal type is "null". This lets you eliminate some invalid states at the type system level.
 
