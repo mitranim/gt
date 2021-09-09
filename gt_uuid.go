@@ -241,3 +241,18 @@ func uuidParseCanon(src string) (val Uuid, err error) {
 	}
 	return
 }
+
+// Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+func (self Uuid) GoString() string {
+	const fun = `gt.ParseUuid`
+
+	var arr [len(fun) + len("(`") + len(uuidStrZero) + len("`)")]byte
+
+	buf := arr[:0]
+	buf = append(buf, fun...)
+	buf = append(buf, "(`"...)
+	buf = self.Append(buf)
+	buf = append(buf, "`)"...)
+
+	return string(buf)
+}

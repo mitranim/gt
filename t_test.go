@@ -1,6 +1,8 @@
 package gt_test
 
 import (
+	"fmt"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -10,7 +12,7 @@ import (
 
 // TODO: test various invalid inputs.
 // TODO: verify that we can decode both RFC3339 timestamps and short dates.
-func TestNullDate(t *testing.T) {
+func Test_NullDate(t *testing.T) {
 	var (
 		primZero    = time.Time{}
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
@@ -36,7 +38,7 @@ func TestNullDate(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func TestNullFloat(t *testing.T) {
+func Test_NullFloat(t *testing.T) {
 	var (
 		primZero    = float64(0)
 		primNonZero = float64(123)
@@ -63,7 +65,7 @@ func TestNullFloat(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func TestNullInt(t *testing.T) {
+func Test_NullInt(t *testing.T) {
 	var (
 		primZero    = int64(0)
 		primNonZero = int64(123)
@@ -103,7 +105,7 @@ func TestNullInt(t *testing.T) {
 
 // TODO: test various invalid inputs.
 // TODO: more tests for encoding and decoding.
-func TestInterval(t *testing.T) {
+func Test_Interval(t *testing.T) {
 	var (
 		primZero    = `PT0S`
 		primNonZero = `P1Y2M3DT4H5M6S`
@@ -124,7 +126,7 @@ func TestInterval(t *testing.T) {
 
 // TODO: test various invalid inputs.
 // TODO: more tests for encoding and decoding.
-func TestNullInterval(t *testing.T) {
+func Test_NullInterval(t *testing.T) {
 	var (
 		primZero    = ``
 		primNonZero = `P1Y2M3DT4H5M6S`
@@ -143,7 +145,7 @@ func TestNullInterval(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
-func TestNullString(t *testing.T) {
+func Test_NullString(t *testing.T) {
 	var (
 		primZero    = string(``)
 		primNonZero = string(`123`)
@@ -163,7 +165,7 @@ func TestNullString(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func TestNullTime(t *testing.T) {
+func Test_NullTime(t *testing.T) {
 	var (
 		primZero    = time.Time{}
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
@@ -183,7 +185,7 @@ func TestNullTime(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func TestNullUint(t *testing.T) {
+func Test_NullUint(t *testing.T) {
 	var (
 		primZero    = uint64(0)
 		primNonZero = uint64(123)
@@ -222,7 +224,32 @@ func TestNullUint(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func TestNullUuid(t *testing.T) {
+func Test_NullUrl(t *testing.T) {
+	var (
+		primZero    = (*url.URL)(nil)
+		primNonZero = &url.URL{Scheme: `https`, Host: `example.com`}
+		textZero    = ``
+		textNonZero = `https://example.com`
+		jsonZero    = nullBytes
+		jsonNonZero = jsonBytes(textNonZero)
+		zero        = gt.NullUrl{}
+		nonZero     = gt.ParseNullUrl(textNonZero)
+		dec         = new(gt.NullUrl)
+	)
+
+	eq(true, zero.IsNull())
+	eq(false, nonZero.IsNull())
+
+	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
+}
+
+func Test_NullUrl_GoString(t *testing.T) {
+	eq("gt.NullUrl{}", fmt.Sprintf(`%#v`, gt.NullUrl{}))
+	eq("gt.ParseNullUrl(`one://two.three/four?five=six#seven`)", fmt.Sprintf(`%#v`, gt.ParseNullUrl(`one://two.three/four?five=six#seven`)))
+}
+
+// TODO: test various invalid inputs.
+func Test_NullUuid(t *testing.T) {
 	var (
 		primZero    = ``
 		primNonZero = [gt.UuidLen]byte{0xae, 0x68, 0xcc, 0xca, 0x87, 0xc3, 0x44, 0xaf, 0xa8, 0xa0, 0x20, 0x9c, 0xe, 0x20, 0x53, 0x43}
@@ -241,22 +268,27 @@ func TestNullUuid(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
-func TestParseNullUuid(t *testing.T) {
+func Test_ParseNullUuid(t *testing.T) {
 	eq(``, gt.ParseNullUuid(``).String())
 	eq(`ddf1bfce018c4bef898ba4f293946049`, gt.ParseNullUuid(`ddf1bfce018c4bef898ba4f293946049`).String())
 	eq(`ddf1bfce018c4bef898ba4f293946049`, gt.ParseNullUuid(`ddf1bfce-018c-4bef-898b-a4f293946049`).String())
 }
 
 // TODO: test versioning.
-func TestRandomNullUuid(t *testing.T) {
+func Test_RandomNullUuid(t *testing.T) {
 	eq(false, gt.RandomNullUuid().IsZero())
 	eq(false, gt.RandomNullUuid().IsZero())
 	neq(gt.RandomNullUuid(), gt.RandomNullUuid())
 	neq(gt.RandomNullUuid(), gt.RandomNullUuid())
 }
 
+func Test_NullUuid_GoString(t *testing.T) {
+	eq("gt.NullUuid{}", fmt.Sprintf(`%#v`, gt.NullUuid{}))
+	eq("gt.ParseNullUuid(`b85ae23dc3f4468995d688e1ee645501`)", fmt.Sprintf(`%#v`, gt.ParseNullUuid(`b85ae23dc3f4468995d688e1ee645501`)))
+}
+
 // TODO: test various invalid inputs.
-func TestUuid(t *testing.T) {
+func Test_Uuid(t *testing.T) {
 	var (
 		primZero    = [gt.UuidLen]byte{}
 		primNonZero = [gt.UuidLen]byte{0xae, 0x68, 0xcc, 0xca, 0x87, 0xc3, 0x44, 0xaf, 0xa8, 0xa0, 0x20, 0x9c, 0xe, 0x20, 0x53, 0x43}
@@ -273,6 +305,11 @@ func TestUuid(t *testing.T) {
 	eq(false, nonZero.IsNull())
 
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
+}
+
+func Test_Uuid_GoString(t *testing.T) {
+	eq("gt.ParseUuid(`00000000000000000000000000000000`)", fmt.Sprintf(`%#v`, gt.Uuid{}))
+	eq("gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)", fmt.Sprintf(`%#v`, gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)))
 }
 
 func testAny(
@@ -498,19 +535,19 @@ func testScanNonEmpty(
 	eqPtr(nonZero, dec)
 }
 
-func Benchmark_uuid_parse_simple(b *testing.B) {
+func Benchmark_ParseNullUuid_simple(b *testing.B) {
 	for range counter(b.N) {
 		_ = gt.ParseNullUuid(`a915f35f0a3344bc8b9fb36bb650708d`)
 	}
 }
 
-func Benchmark_uuid_parse_canon(b *testing.B) {
+func Benchmark_ParseNullUuid_canon(b *testing.B) {
 	for range counter(b.N) {
 		_ = gt.ParseNullUuid(`c230ed9a-e855-469c-8ebb-59c565aacaa7`)
 	}
 }
 
-func Benchmark_uuid_string(b *testing.B) {
+func Benchmark_NullUuid_string(b *testing.B) {
 	val := gt.ParseNullUuid(`6b4c96c70bbc4d57a673de9620688f01`)
 
 	for range counter(b.N) {
@@ -518,13 +555,29 @@ func Benchmark_uuid_string(b *testing.B) {
 	}
 }
 
-func Benchmark_date_parse(b *testing.B) {
+func Benchmark_Uuid_GoString(b *testing.B) {
+	val := gt.ParseUuid(`6b4c96c70bbc4d57a673de9620688f01`)
+
+	for range counter(b.N) {
+		_ = val.GoString()
+	}
+}
+
+func Benchmark_NullUuid_GoString(b *testing.B) {
+	val := gt.ParseNullUuid(`6b4c96c70bbc4d57a673de9620688f01`)
+
+	for range counter(b.N) {
+		_ = val.GoString()
+	}
+}
+
+func Benchmark_ParseNullDate(b *testing.B) {
 	for range counter(b.N) {
 		_ = gt.ParseNullDate(`1234-05-06`)
 	}
 }
 
-func Benchmark_date_string(b *testing.B) {
+func Benchmark_NullDate_String(b *testing.B) {
 	val := gt.ParseNullDate(`1234-05-06`)
 
 	for range counter(b.N) {
@@ -532,13 +585,13 @@ func Benchmark_date_string(b *testing.B) {
 	}
 }
 
-func Benchmark_interval_parse(b *testing.B) {
+func Benchmark_ParseNullInterval(b *testing.B) {
 	for range counter(b.N) {
 		_ = gt.ParseNullInterval(`P12Y23M34DT45H56M67S`)
 	}
 }
 
-func Benchmark_interval_string(b *testing.B) {
+func Benchmark_NullInterval_String(b *testing.B) {
 	val := gt.ParseNullInterval(`P12Y23M34DT45H56M67S`)
 
 	for range counter(b.N) {

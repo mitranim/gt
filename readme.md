@@ -12,6 +12,7 @@ Short for "**G**o **T**ypes". Important data types missing from the Go standard 
 * `NullInt`: int where zero value is empty/null.
 * `NullUint`: uint where zero value is empty/null.
 * `NullFloat`: float where zero value is empty/null.
+* `NullUrl`: actually usable variant of `url.URL`, used by value rather than pointer, and where zero value is empty/null.
 
 API docs: https://pkg.go.dev/github.com/mitranim/gt
 
