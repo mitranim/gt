@@ -48,12 +48,15 @@ func (self NullUrl) IsNull() bool { return self.IsZero() }
 // Implement `gt.PtrGetter`, returning `*url.URL`.
 func (self *NullUrl) GetPtr() interface{} { return (*url.URL)(self) }
 
-// Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `*url.URL`.
+/*
+Implement `gt.Getter`. If zero, returns `nil`, otherwise uses `.String` to
+return a string representation.
+*/
 func (self NullUrl) Get() interface{} {
 	if self.IsNull() {
 		return nil
 	}
-	return self.UrlPtr()
+	return self.String()
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.

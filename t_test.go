@@ -2,7 +2,6 @@ package gt_test
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -226,10 +225,10 @@ func Test_NullUint(t *testing.T) {
 // TODO: test various invalid inputs.
 func Test_NullUrl(t *testing.T) {
 	var (
-		primZero    = (*url.URL)(nil)
-		primNonZero = &url.URL{Scheme: `https`, Host: `example.com`}
-		textZero    = ``
-		textNonZero = `https://example.com`
+		primZero    = ``
+		primNonZero = `https://example.com`
+		textZero    = primZero
+		textNonZero = primNonZero
 		jsonZero    = nullBytes
 		jsonNonZero = jsonBytes(textNonZero)
 		zero        = gt.NullUrl{}
