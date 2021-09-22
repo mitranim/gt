@@ -247,8 +247,14 @@ Sets the interval to an approximate value of the given duration, expressed in
 hours, minutes, seconds, truncating any fractions that don't fit.
 */
 func (self *Interval) SetDuration(val time.Duration) {
-	hours, minutes, seconds := val.Hours(), val.Minutes(), val.Seconds()
-	*self = Interval{Hours: int(hours), Minutes: int(minutes), Seconds: int(seconds)}
+	const minSecs = 60
+	const hourMins = 60
+
+	hours := int(val.Hours())
+	minutes := int(val.Minutes()) - (hours * hourMins)
+	seconds := int(val.Seconds()) - (minutes * minSecs) - (hours * hourMins * minSecs)
+
+	*self = Interval{Hours: hours, Minutes: minutes, Seconds: seconds}
 }
 
 // True if the interval has years, months, or days.
