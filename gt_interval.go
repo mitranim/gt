@@ -250,6 +250,7 @@ func (self *Interval) SetDuration(val time.Duration) {
 	const minSecs = 60
 	const hourMins = 60
 
+	// TODO simpler math.
 	hours := int(val.Hours())
 	minutes := int(val.Minutes()) - (hours * hourMins)
 	seconds := int(val.Seconds()) - (minutes * minSecs) - (hours * hourMins * minSecs)
@@ -279,6 +280,115 @@ func (self Interval) Duration() (val time.Duration, err error) {
 	return time.Duration(self.Hours)*time.Hour +
 		time.Duration(self.Minutes)*time.Minute +
 		time.Duration(self.Seconds)*time.Second, nil
+}
+
+// Returns a version of this interval with `.Years = val`.
+func (self Interval) WithYears(val int) Interval {
+	self.Years = val
+	return self
+}
+
+// Returns a version of this interval with `.Months = val`.
+func (self Interval) WithMonths(val int) Interval {
+	self.Months = val
+	return self
+}
+
+// Returns a version of this interval with `.Days = val`.
+func (self Interval) WithDays(val int) Interval {
+	self.Days = val
+	return self
+}
+
+// Returns a version of this interval with `.Hours = val`.
+func (self Interval) WithHours(val int) Interval {
+	self.Hours = val
+	return self
+}
+
+// Returns a version of this interval with `.Minutes = val`.
+func (self Interval) WithMinutes(val int) Interval {
+	self.Minutes = val
+	return self
+}
+
+// Returns a version of this interval with `.Seconds = val`.
+func (self Interval) WithSeconds(val int) Interval {
+	self.Seconds = val
+	return self
+}
+
+// Returns a version of this interval with `.Years += val`.
+func (self Interval) AddYears(val int) Interval {
+	self.Years += val
+	return self
+}
+
+// Returns a version of this interval with `.Months += val`.
+func (self Interval) AddMonths(val int) Interval {
+	self.Months += val
+	return self
+}
+
+// Returns a version of this interval with `.Days += val`.
+func (self Interval) AddDays(val int) Interval {
+	self.Days += val
+	return self
+}
+
+// Returns a version of this interval with `.Hours += val`.
+func (self Interval) AddHours(val int) Interval {
+	self.Hours += val
+	return self
+}
+
+// Returns a version of this interval with `.Minutes += val`.
+func (self Interval) AddMinutes(val int) Interval {
+	self.Minutes += val
+	return self
+}
+
+// Returns a version of this interval with `.Seconds += val`.
+func (self Interval) AddSeconds(val int) Interval {
+	self.Seconds += val
+	return self
+}
+
+/*
+Adds every field of one interval to every field of another interval, returning
+the sum. Does NOT convert fields between each other.
+*/
+func (self Interval) Add(val Interval) Interval {
+	return Interval{
+		Years:   self.Years + val.Years,
+		Months:  self.Months + val.Months,
+		Days:    self.Days + val.Days,
+		Hours:   self.Hours + val.Hours,
+		Minutes: self.Minutes + val.Minutes,
+		Seconds: self.Seconds + val.Seconds,
+	}
+}
+
+/*
+Subtracts every field of one interval from every corresponding field of another
+interval, returning the difference. Does NOT convert fields between each
+other.
+*/
+func (self Interval) Sub(val Interval) Interval {
+	return self.Add(val.Neg())
+}
+
+// Returns a version of this interval with every field inverted: positive fields
+// become negative, and negative fields become positive.
+func (self Interval) Neg() Interval {
+	return Interval{
+		Years:   -self.Years,
+		Months:  -self.Months,
+		Days:    -self.Days,
+		Hours:   -self.Hours,
+		Minutes: -self.Minutes,
+		Seconds: -self.Seconds,
+	}
 }
 
 func (self Interval) bufLen() (num int) {

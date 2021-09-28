@@ -165,7 +165,7 @@ func nullJsonMarshalGetter(enc nullableGetter) ([]byte, error) {
 	return json.Marshal(enc.Get())
 }
 
-// Original should be passed by pointer to avoid copying.
+// Original must be passed by pointer.
 func nullJsonUnmarshalGetter(src []byte, dec zeroerPtrGetter) error {
 	if isJsonEmpty(src) {
 		dec.Zero()

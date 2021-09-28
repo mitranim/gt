@@ -200,3 +200,86 @@ func (self NullInterval) HasDate() bool {
 func (self NullInterval) HasTime() bool {
 	return Interval(self).HasTime()
 }
+
+// Returns a version of this interval with `.Years = val`.
+func (self NullInterval) WithYears(val int) NullInterval {
+	return NullInterval(Interval(self).WithYears(val))
+}
+
+// Returns a version of this interval with `.Months = val`.
+func (self NullInterval) WithMonths(val int) NullInterval {
+	return NullInterval(Interval(self).WithMonths(val))
+}
+
+// Returns a version of this interval with `.Days = val`.
+func (self NullInterval) WithDays(val int) NullInterval {
+	return NullInterval(Interval(self).WithDays(val))
+}
+
+// Returns a version of this interval with `.Hours = val`.
+func (self NullInterval) WithHours(val int) NullInterval {
+	return NullInterval(Interval(self).WithHours(val))
+}
+
+// Returns a version of this interval with `.Minutes = val`.
+func (self NullInterval) WithMinutes(val int) NullInterval {
+	return NullInterval(Interval(self).WithMinutes(val))
+}
+
+// Returns a version of this interval with `.Seconds = val`.
+func (self NullInterval) WithSeconds(val int) NullInterval {
+	return NullInterval(Interval(self).WithSeconds(val))
+}
+
+// Returns a version of this interval with `.Years += val`.
+func (self NullInterval) AddYears(val int) NullInterval {
+	return NullInterval(Interval(self).AddYears(val))
+}
+
+// Returns a version of this interval with `.Months += val`.
+func (self NullInterval) AddMonths(val int) NullInterval {
+	return NullInterval(Interval(self).AddMonths(val))
+}
+
+// Returns a version of this interval with `.Days += val`.
+func (self NullInterval) AddDays(val int) NullInterval {
+	return NullInterval(Interval(self).AddDays(val))
+}
+
+// Returns a version of this interval with `.Hours += val`.
+func (self NullInterval) AddHours(val int) NullInterval {
+	return NullInterval(Interval(self).AddHours(val))
+}
+
+// Returns a version of this interval with `.Minutes += val`.
+func (self NullInterval) AddMinutes(val int) NullInterval {
+	return NullInterval(Interval(self).AddMinutes(val))
+}
+
+// Returns a version of this interval with `.Seconds += val`.
+func (self NullInterval) AddSeconds(val int) NullInterval {
+	return NullInterval(Interval(self).AddSeconds(val))
+}
+
+/*
+Adds every field of one interval to every field of another interval, returning
+the sum. Does NOT convert fields between each other.
+*/
+func (self NullInterval) Add(val NullInterval) NullInterval {
+	return NullInterval(Interval(self).Add(Interval(val)))
+}
+
+/*
+Subtracts every field of one interval from every corresponding field of another
+interval, returning the difference. Does NOT convert fields between each
+other.
+*/
+func (self NullInterval) Sub(val NullInterval) NullInterval {
+	return NullInterval(Interval(self).Sub(Interval(val)))
+}
+
+// Returns a version of this interval with every field inverted: positive fields
+// become negative, and negative fields become positive.
+func (self NullInterval) Neg() NullInterval {
+	return NullInterval(Interval(self).Neg())
+}
