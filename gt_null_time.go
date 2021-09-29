@@ -89,7 +89,11 @@ var (
 	_ = Decodable((*NullTime)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
+/*
+Implement `gt.Zeroable`. Same as `self.Time().IsZero()`. Unlike most
+implementations of `gt.Zeroable` in this package, this is NOT equivalent to
+`reflect.ValueOf(self).IsZero()`, but rather a superset of it.
+*/
 func (self NullTime) IsZero() bool { return self.Time().IsZero() }
 
 // Implement `gt.Nullable`. True if zero.
@@ -280,11 +284,25 @@ func (self NullTime) MaybeTime() *time.Time {
 	return self.TimePtr()
 }
 
-// `NullTime` version of `time.Time.After`.
-func (self NullTime) After(val NullTime) bool { return self.Time().After(val.Time()) }
+/*
+`NullTime` version of `time.Time.After`. Note that while `time.Time{}` is
+considered to be the start of the first day of the first month of the first
+year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
+values is zero, this returns false regardless of the other value.
+*/
+func (self NullTime) After(val NullTime) bool {
+	return !self.IsNull() && !val.IsNull() && self.Time().After(val.Time())
+}
 
-// `NullTime` version of `time.Time.Before`.
-func (self NullTime) Before(val NullTime) bool { return self.Time().Before(val.Time()) }
+/*
+`NullTime` version of `time.Time.Before`. Note that while `time.Time{}` is
+considered to be the start of the first day of the first month of the first
+year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
+values is zero, this returns false regardless of the other value.
+*/
+func (self NullTime) Before(val NullTime) bool {
+	return !self.IsNull() && !val.IsNull() && self.Time().Before(val.Time())
+}
 
 // `NullTime` version of `time.Time.Equal`.
 func (self NullTime) Equal(val NullTime) bool { return self.Time().Equal(val.Time()) }
