@@ -127,7 +127,7 @@ Otherwise returns bytes representing a JSON string with the same text as in
 */
 func (self NullUrl) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
-		return nullBytes, nil
+		return bytesNull, nil
 	}
 	return json.Marshal(self.String())
 }

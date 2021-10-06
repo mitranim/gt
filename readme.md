@@ -13,6 +13,7 @@ Short for "**G**o **T**ypes". Important data types missing from the Go standard 
 * `NullUint`: uint where zero value is empty/null.
 * `NullFloat`: float where zero value is empty/null.
 * `NullUrl`: actually usable variant of `url.URL`, used by value rather than pointer, and where zero value is empty/null.
+* `Ter`: nullable boolean (ternary), more usable and efficient than either `*bool` or `sql.NullBool`.
 
 API docs: https://pkg.go.dev/github.com/mitranim/gt
 

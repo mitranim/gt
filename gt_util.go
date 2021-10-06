@@ -52,7 +52,15 @@ const (
 )
 
 var (
-	nullBytes   = []byte(`null`)
+	bytesNull  = []byte(`null`)
+	bytesFalse = []byte(`false`)
+	bytesTrue  = []byte(`true`)
+
+	staticFalse = false
+	staticTrue  = true
+	ptrFalse    = &staticFalse
+	ptrTrue     = &staticTrue
+
 	uuidStrZero [UuidStrLen]byte
 )
 
@@ -152,7 +160,7 @@ func nullTextUnmarshalParser(src []byte, dec zeroerParser) error {
 // Original should be passed by pointer to avoid copying.
 func nullJsonMarshal(isNull bool, enc json.Marshaler) ([]byte, error) {
 	if isNull {
-		return nullBytes, nil
+		return bytesNull, nil
 	}
 	return enc.MarshalJSON()
 }
@@ -160,7 +168,7 @@ func nullJsonMarshal(isNull bool, enc json.Marshaler) ([]byte, error) {
 // Original should be passed by pointer to avoid copying.
 func nullJsonMarshalGetter(enc nullableGetter) ([]byte, error) {
 	if enc == nil || enc.IsNull() {
-		return nullBytes, nil
+		return bytesNull, nil
 	}
 	return json.Marshal(enc.Get())
 }
@@ -205,7 +213,7 @@ Empty input = edge case of calling `.UnmarshalJSON` directly and passing nil or
 `[]byte{}`. Not sure if we care.
 */
 func isJsonEmpty(val []byte) bool {
-	return len(val) == 0 || bytes.Equal(val, nullBytes)
+	return len(val) == 0 || bytes.Equal(val, bytesNull)
 }
 
 func isJsonStr(val []byte) bool {
@@ -230,7 +238,7 @@ func errInvalidChar(src string, i int) error {
 }
 
 func hexDecode(a, b byte) (byte, bool) {
-	return (hexDigits[a] << 4) | hexDigits[b], hexBools[a] && hexBools[b]
+	return ((hexDigits[a] << 4) | hexDigits[b]), (hexBools[a] && hexBools[b])
 }
 
 var hexDigits = [256]byte{

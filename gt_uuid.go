@@ -242,7 +242,11 @@ func uuidParseCanon(src string) (val Uuid, err error) {
 	return
 }
 
-// Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+/*
+Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+The rendered code is biased for readability over performance: it parses a
+string instead of using a literal constructor.
+*/
 func (self Uuid) GoString() string {
 	const fun = `gt.ParseUuid`
 

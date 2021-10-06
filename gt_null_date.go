@@ -148,7 +148,7 @@ Otherwise returns bytes representing a JSON string with the same text as in
 */
 func (self NullDate) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
-		return nullBytes, nil
+		return bytesNull, nil
 	}
 
 	var arr [dateStrLen + 2]byte

@@ -17,7 +17,7 @@ func Test_NullDate(t *testing.T) {
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
 		textZero    = ``
 		textNonZero = `1234-05-06`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(textNonZero)
 		zero        = gt.NullDate{}
 		nonZero     = gt.NullDateFrom(1234, 5, 6)
@@ -43,7 +43,7 @@ func Test_NullFloat(t *testing.T) {
 		primNonZero = float64(123)
 		textZero    = ``
 		textNonZero = `123`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(primNonZero)
 		zero        = gt.NullFloat(primZero)
 		nonZero     = gt.NullFloat(primNonZero)
@@ -70,7 +70,7 @@ func Test_NullInt(t *testing.T) {
 		primNonZero = int64(123)
 		textZero    = ``
 		textNonZero = `123`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(primNonZero)
 		zero        = gt.NullInt(primZero)
 		nonZero     = gt.NullInt(primNonZero)
@@ -145,7 +145,7 @@ func Test_NullInterval(t *testing.T) {
 		primNonZero = `P1Y2M3DT4H5M6S`
 		textZero    = ``
 		textNonZero = primNonZero
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(textNonZero)
 		zero        = gt.NullInterval{}
 		nonZero     = gt.NullIntervalFrom(1, 2, 3, 4, 5, 6)
@@ -164,7 +164,7 @@ func Test_NullString(t *testing.T) {
 		primNonZero = string(`123`)
 		textZero    = ``
 		textNonZero = `123`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(primNonZero)
 		zero        = gt.NullString(primZero)
 		nonZero     = gt.NullString(primNonZero)
@@ -184,7 +184,7 @@ func Test_NullTime(t *testing.T) {
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
 		textZero    = ``
 		textNonZero = `1234-05-06T00:00:00Z`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(primNonZero)
 		zero        = gt.NullTime(primZero)
 		nonZero     = gt.NullTime(primNonZero)
@@ -197,6 +197,24 @@ func Test_NullTime(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
+func Test_NullTime_Before(t *testing.T) {
+	eq(false, gt.NullTime{}.Before(gt.NullTime{}))
+	eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullTime{}))
+	eq(false, gt.NullTime{}.Before(gt.NullDateUTC(1, 2, 3)))
+	eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 3)))
+	eq(false, gt.NullDateUTC(1, 2, 4).Before(gt.NullDateUTC(1, 2, 3)))
+	eq(true, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 4)))
+}
+
+func Test_NullTime_After(t *testing.T) {
+	eq(false, gt.NullTime{}.After(gt.NullTime{}))
+	eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullTime{}))
+	eq(false, gt.NullTime{}.After(gt.NullDateUTC(1, 2, 3)))
+	eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 3)))
+	eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 4)))
+	eq(true, gt.NullDateUTC(1, 2, 4).After(gt.NullDateUTC(1, 2, 3)))
+}
+
 // TODO: test various invalid inputs.
 func Test_NullUint(t *testing.T) {
 	var (
@@ -204,7 +222,7 @@ func Test_NullUint(t *testing.T) {
 		primNonZero = uint64(123)
 		textZero    = ``
 		textNonZero = `123`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(primNonZero)
 		zero        = gt.NullUint(primZero)
 		nonZero     = gt.NullUint(primNonZero)
@@ -243,7 +261,7 @@ func Test_NullUrl(t *testing.T) {
 		primNonZero = `https://example.com`
 		textZero    = primZero
 		textNonZero = primNonZero
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(textNonZero)
 		zero        = gt.NullUrl{}
 		nonZero     = gt.ParseNullUrl(textNonZero)
@@ -268,7 +286,7 @@ func Test_NullUuid(t *testing.T) {
 		primNonZero = [gt.UuidLen]byte{0xae, 0x68, 0xcc, 0xca, 0x87, 0xc3, 0x44, 0xaf, 0xa8, 0xa0, 0x20, 0x9c, 0xe, 0x20, 0x53, 0x43}
 		textZero    = ``
 		textNonZero = `ae68ccca87c344afa8a0209c0e205343`
-		jsonZero    = nullBytes
+		jsonZero    = bytesNull
 		jsonNonZero = jsonBytes(textNonZero)
 		zero        = gt.NullUuid{}
 		nonZero     = gt.ParseNullUuid(textNonZero)
@@ -325,6 +343,32 @@ func Test_Uuid_GoString(t *testing.T) {
 	eq("gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)", fmt.Sprintf(`%#v`, gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)))
 }
 
+/*
+TODO:
+
+	* Test various invalid inputs.
+	* Ensure all three states are tested.
+	* Test various auxiliary methods.
+*/
+func Test_Ter(t *testing.T) {
+	var (
+		primZero    = interface{}(nil)
+		primNonZero = true
+		textZero    = ``
+		textNonZero = `true`
+		jsonZero    = bytesNull
+		jsonNonZero = bytesTrue
+		zero        = gt.TerNull
+		nonZero     = gt.TerTrue
+		dec         = new(gt.Ter)
+	)
+
+	eq(true, zero.IsNull())
+	eq(false, nonZero.IsNull())
+
+	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
+}
+
 func testAny(
 	t *testing.T,
 	primZero, primNonZero interface{},
@@ -333,7 +377,7 @@ func testAny(
 	zero, nonZero gt.Encodable,
 	dec EncodableDecodable,
 ) {
-	// Note: `primZero` doesn't have to be Go zero.
+	// Note: `primZero` is not tested here because it doesn't have to be Go zero.
 	t.Run(`zeros`, func(t *testing.T) {
 		eq(true, reflect.ValueOf(zero).IsZero())
 		eq(false, reflect.ValueOf(primNonZero).IsZero())
@@ -462,10 +506,10 @@ func testAny(
 				eqPtr(nonZero, dec)
 
 				if zero.IsNull() {
-					try(dec.UnmarshalJSON(nullBytes))
+					try(dec.UnmarshalJSON(bytesNull))
 					eqPtr(zero, dec)
 				} else {
-					fail(dec.UnmarshalJSON(nullBytes))
+					fail(dec.UnmarshalJSON(bytesNull))
 				}
 			})
 

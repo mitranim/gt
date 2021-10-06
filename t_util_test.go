@@ -13,7 +13,10 @@ type EncodableDecodable interface {
 	gt.Decodable
 }
 
-var nullBytes = []byte(`null`)
+var (
+	bytesNull = []byte(`null`)
+	bytesTrue = []byte(`true`)
+)
 
 func eq(exp, act interface{}) {
 	if !reflect.DeepEqual(exp, act) {

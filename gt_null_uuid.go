@@ -198,7 +198,11 @@ func (self NullUuid) Less(other NullUuid) bool {
 	return Uuid(self).Less(Uuid(other))
 }
 
-// Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+/*
+Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+The rendered code is biased for readability over performance: it parses a
+string instead of using a literal constructor.
+*/
 func (self NullUuid) GoString() string {
 	if self.IsNull() {
 		return `gt.NullUuid{}`
