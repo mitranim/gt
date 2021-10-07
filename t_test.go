@@ -369,6 +369,15 @@ func Test_Ter(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
+func Test_Ter_GoString(t *testing.T) {
+	eq(`gt.TerNull`, fmt.Sprintf(`%#v`, gt.Ter(0)))
+	eq(`gt.TerNull`, fmt.Sprintf(`%#v`, gt.TerNull))
+	eq(`gt.TerFalse`, fmt.Sprintf(`%#v`, gt.TerFalse))
+	eq(`gt.TerTrue`, fmt.Sprintf(`%#v`, gt.TerTrue))
+	eq(`gt.Ter(3)`, fmt.Sprintf(`%#v`, gt.Ter(3)))
+	eq(`gt.Ter(255)`, fmt.Sprintf(`%#v`, gt.Ter(255)))
+}
+
 func testAny(
 	t *testing.T,
 	primZero, primNonZero interface{},

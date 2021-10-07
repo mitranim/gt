@@ -348,3 +348,17 @@ func (self Ter) IsTrue() bool { return self == TerTrue }
 
 // Same as `== gt.TerFalse`.
 func (self Ter) IsFalse() bool { return self == TerFalse }
+
+// Implement `fmt.GoStringer`, returning valid Go code representing this value.
+func (self Ter) GoString() string {
+	switch self {
+	case TerNull:
+		return `gt.TerNull`
+	case TerFalse:
+		return `gt.TerFalse`
+	case TerTrue:
+		return `gt.TerTrue`
+	default:
+		return fmt.Sprintf(`gt.Ter(%v)`, byte(self))
+	}
+}
