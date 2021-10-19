@@ -159,16 +159,7 @@ func (self *Ter) Parse(src string) (err error) {
 
 // Implement `gt.Appender`, using the same representation as `.String`.
 func (self Ter) Append(buf []byte) []byte {
-	switch self {
-	case TerNull:
-		return buf
-	case TerFalse:
-		return append(buf, `false`...)
-	case TerTrue:
-		return append(buf, `true`...)
-	default:
-		panic(self.invalid())
-	}
+	return append(buf, self.String()...)
 }
 
 /*

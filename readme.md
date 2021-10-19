@@ -1,6 +1,6 @@
 ## Overview
 
-Short for "**G**o **T**ypes". Important data types missing from the Go standard library.
+Short for "**G**o **T**ypes". Important data types missing from the Go standard library. Tiny and dependency-free.
 
 * `Date`: civil date without time.
 * `NullDate`: civil date where zero value is empty/null.
