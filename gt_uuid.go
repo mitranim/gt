@@ -22,7 +22,7 @@ func RandomUuid() Uuid {
 func ReadUuid(src io.Reader) (val Uuid, err error) {
 	_, err = io.ReadFull(src, val[:])
 	if err != nil {
-		err = fmt.Errorf(`failed to read random bytes for UUID: %w`, err)
+		err = fmt.Errorf(`[gt] failed to read random bytes for UUID: %w`, err)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (self *Uuid) Parse(src string) (err error) {
 	case 36:
 		return self.maybeSet(uuidParseCanon(src))
 	default:
-		return fmt.Errorf(`unrecognized length`)
+		return fmt.Errorf(`[gt] unrecognized length`)
 	}
 }
 
@@ -213,7 +213,7 @@ func (self *Uuid) maybeSet(val Uuid, err error) error {
 
 func uuidParseSimple(src string) (val Uuid, err error) {
 	if len(src) != 32 {
-		err = fmt.Errorf(`length mismatch`)
+		err = fmt.Errorf(`[gt] length mismatch`)
 		return
 	}
 	_, err = hex.Decode(val[:], stringToBytesUnsafe(src))
@@ -222,12 +222,12 @@ func uuidParseSimple(src string) (val Uuid, err error) {
 
 func uuidParseCanon(src string) (val Uuid, err error) {
 	if len(src) != 36 {
-		err = fmt.Errorf(`length mismatch`)
+		err = fmt.Errorf(`[gt] length mismatch`)
 		return
 	}
 
 	if !(src[8] == '-' && src[13] == '-' && src[18] == '-' && src[23] == '-') {
-		err = fmt.Errorf(`format mismatch`)
+		err = fmt.Errorf(`[gt] format mismatch`)
 		return
 	}
 

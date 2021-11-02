@@ -153,7 +153,7 @@ func (self *Ter) Parse(src string) (err error) {
 		*self = TerTrue
 		return nil
 	default:
-		return fmt.Errorf(`failed to parse ternary: expected empty string, "false", or "true", got %q`, src)
+		return fmt.Errorf(`[gt] failed to parse ternary: expected empty string, "false", or "true", got %q`, src)
 	}
 }
 
@@ -263,7 +263,7 @@ func (self *Ter) Scan(src interface{}) error {
 }
 
 func (self Ter) invalid() error {
-	return fmt.Errorf(`unrecognized value of %[1]T: %[1]v`, self)
+	return fmt.Errorf(`[gt] unrecognized value of %[1]T: %[1]v`, self)
 }
 
 // Sets the receiver to the result of `gt.BoolTer`.
@@ -291,7 +291,7 @@ otherwise panics.
 func (self Ter) TryBool() bool {
 	switch self {
 	case TerNull:
-		panic(fmt.Errorf(`can't convert ternary null to boolean`))
+		panic(fmt.Errorf(`[gt] can't convert ternary null to boolean`))
 	case TerFalse:
 		return false
 	case TerTrue:

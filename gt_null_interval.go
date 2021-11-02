@@ -191,6 +191,21 @@ func (self *NullInterval) SetDuration(val time.Duration) {
 	(*Interval)(self).SetDuration(val)
 }
 
+// Same as `gt.Interval.Date`.
+func (self NullInterval) Date() (years int, months int, days int) {
+	return Interval(self).Date()
+}
+
+// Same as `gt.Interval.OnlyDate`.
+func (self NullInterval) OnlyDate() NullInterval {
+	return NullInterval(Interval(self).OnlyDate())
+}
+
+// Same as `gt.Interval.OnlyTime`.
+func (self NullInterval) OnlyTime() NullInterval {
+	return NullInterval(Interval(self).OnlyTime())
+}
+
 // Same as `gt.Interval.HasDate`.
 func (self NullInterval) HasDate() bool {
 	return Interval(self).HasDate()
@@ -199,6 +214,11 @@ func (self NullInterval) HasDate() bool {
 // Same as `gt.Interval.HasTime`.
 func (self NullInterval) HasTime() bool {
 	return Interval(self).HasTime()
+}
+
+// Same as `gt.Interval.Duration`.
+func (self NullInterval) Duration() time.Duration {
+	return Interval(self).Duration()
 }
 
 // Returns a version of this interval with `.Years = val`.

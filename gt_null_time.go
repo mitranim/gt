@@ -285,6 +285,19 @@ func (self NullTime) MaybeTime() *time.Time {
 }
 
 /*
+Adds the interval to the time, returning the modified time. If the interval is a
+zero value, the resulting time should be identical to the source.
+*/
+func (self NullTime) AddInterval(val Interval) NullTime {
+	return self.AddDate(val.Date()).Add(val.OnlyTime().Duration())
+}
+
+// Same as `gt.NullTime.AddInterval` but for `gt.NullInterval`.
+func (self NullTime) AddNullInterval(val NullInterval) NullTime {
+	return self.AddInterval(Interval(val))
+}
+
+/*
 `NullTime` version of `time.Time.After`. Note that while `time.Time{}` is
 considered to be the start of the first day of the first month of the first
 year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two

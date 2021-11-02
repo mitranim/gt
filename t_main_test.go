@@ -84,3 +84,7 @@ func jsonBytes(val interface{}) []byte {
 }
 
 func counter(n int) []struct{} { return make([]struct{}, n) }
+
+type DateTuple [3]int
+
+func DateTupleFrom(a, b, c int) DateTuple { return DateTuple{a, b, c} }

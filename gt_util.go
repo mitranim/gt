@@ -91,7 +91,7 @@ func stringToBytesUnsafe(input string) []byte {
 }
 
 func errScanType(tar, inp interface{}) error {
-	return fmt.Errorf(`unrecognized input for type %T: type %T, value %v`, tar, inp, inp)
+	return fmt.Errorf(`[gt] unrecognized input for type %T: type %T, value %v`, tar, inp, inp)
 }
 
 // Original must be passed by pointer to avoid copying.
@@ -186,7 +186,7 @@ func jsonUnmarshalString(src []byte, dec encoding.TextUnmarshaler) error {
 	if isJsonStr(src) {
 		return dec.UnmarshalText(cutJsonStr(src))
 	}
-	return fmt.Errorf(`can't decode %q into %T: expected string`, src, dec)
+	return fmt.Errorf(`[gt] can't decode %q into %T: expected string`, src, dec)
 }
 
 func nullJsonUnmarshalString(src []byte, dec zeroerTextUnmarshaler) error {
@@ -226,15 +226,15 @@ func cutJsonStr(val []byte) []byte {
 
 func errParse(ptr *error, src string, typ string) {
 	if *ptr != nil {
-		*ptr = fmt.Errorf(`failed to parse %q into %v: %w`, src, typ, *ptr)
+		*ptr = fmt.Errorf(`[gt] failed to parse %q into %v: %w`, src, typ, *ptr)
 	}
 }
 
 func errInvalidChar(src string, i int) error {
 	for _, char := range src[i:] {
-		return fmt.Errorf(`invalid character %q in position %v`, char, i)
+		return fmt.Errorf(`[gt] invalid character %q in position %v`, char, i)
 	}
-	return fmt.Errorf(`invalid character`)
+	return fmt.Errorf(`[gt] invalid character`)
 }
 
 func hexDecode(a, b byte) (byte, bool) {

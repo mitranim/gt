@@ -116,7 +116,7 @@ func (self *Interval) Parse(src string) (err error) {
 
 	match := reInterval.FindStringSubmatch(src)
 	if match == nil {
-		return fmt.Errorf(`format mismatch`)
+		return fmt.Errorf(`[gt] format mismatch`)
 	}
 
 	var buf Interval
@@ -258,6 +258,22 @@ func (self *Interval) SetDuration(val time.Duration) {
 	*self = Interval{Hours: hours, Minutes: minutes, Seconds: seconds}
 }
 
+// Returns the date portion of the interval, disregarding the time portion. The
+// result can be passed to `time.Time.AddDate` and `gt.NullTime.AddDate`.
+func (self Interval) Date() (years int, months int, days int) {
+	return self.Years, self.Months, self.Days
+}
+
+// Returns only the date portion of this interval, with other fields set to 0.
+func (self Interval) OnlyDate() Interval {
+	return Interval{Years: self.Years, Months: self.Months, Days: self.Days}
+}
+
+// Returns only the time portion of this interval, with other fields set to 0.
+func (self Interval) OnlyTime() Interval {
+	return Interval{Hours: self.Hours, Minutes: self.Minutes, Seconds: self.Seconds}
+}
+
 // True if the interval has years, months, or days.
 func (self Interval) HasDate() bool {
 	return self.Years != 0 || self.Months != 0 || self.Days != 0
@@ -269,17 +285,20 @@ func (self Interval) HasTime() bool {
 }
 
 /*
-Converts to `time.Duration` if possible. Returns an error if the interval has a
-date constituent. Warning: there are no overflow checks.
-*/
-func (self Interval) Duration() (val time.Duration, err error) {
-	if self.HasDate() {
-		return 0, fmt.Errorf(`failed to convert interval %q to duration: civil time can't be converted to nanoseconds`, &self)
-	}
+Returns the duration of ONLY the time portion of this interval. Panics if the
+interval has a date constituent. To make it clear that you're explicitly
+disregarding the date part, call `.OnlyTime` first. Warning: there are no
+overflow checks. Usage example:
 
+	someInterval.OnlyTime().Duration()
+*/
+func (self Interval) Duration() time.Duration {
+	if self.HasDate() {
+		panic(fmt.Errorf(`[gt] failed to convert interval %q to duration: days/months/years can't be converted to nanoseconds`, &self))
+	}
 	return time.Duration(self.Hours)*time.Hour +
 		time.Duration(self.Minutes)*time.Minute +
-		time.Duration(self.Seconds)*time.Second, nil
+		time.Duration(self.Seconds)*time.Second
 }
 
 // Returns a version of this interval with `.Years = val`.

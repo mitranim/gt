@@ -17,7 +17,8 @@ Reversible:
 	date == gt.NullDateFrom(date.Date())
 
 Note that `gt.NullDateFrom(0, 0, 0)` returns a zero value which is considered
-empty/null.
+empty/null, but NOT equivalent to `time.Time{}`. The equivalent of zero time is
+`gt.NullDateFrom(1, 1, 1)`.
 */
 func NullDateFrom(year int, month time.Month, day int) NullDate {
 	return NullDate{year, month, day}
@@ -43,6 +44,10 @@ SQL. Features:
 	* Text encoding uses the ISO 8601 extended calendar date format: "0001-02-03".
 	* Text decoding supports date-only strings and full RFC3339 timestamps.
 	* Convertible to and from `gt.NullTime`.
+
+Caution: `gt.NullDate{}` or `gt.NullDate{0, 0, 0}` is considered empty/null, but
+when converted to `time.Time` or `gt.NullTime`, it's NOT equivalent to the zero
+time. The equivalent of zero time is `gt.NullDate{1, 1, 1}`.
 */
 type NullDate struct {
 	Year  int        `json:"year"  db:"year"`
@@ -247,9 +252,7 @@ func (self *NullDate) SetTime(src time.Time) {
 	}
 }
 
-/*
-Same as `time.Time.Date`. Returns a tuple of the underlying year, month, day.
-*/
+// Same as `time.Time.Date`. Returns a tuple of the underlying year, month, day.
 func (self NullDate) Date() (year int, month time.Month, day int) {
 	return self.Year, self.Month, self.Day
 }
@@ -272,4 +275,23 @@ func (self NullDate) TimeIn(loc *time.Location) time.Time {
 // Converts to `time.Time` with `T00:00:00` in UTC.
 func (self NullDate) TimeUTC() time.Time {
 	return self.NullTimeUTC().Time()
+}
+
+/*
+Similar to `time.Time.AddDate`. Returns a modified version of the current value,
+with the year, month, day deltas added to the corresponding fields. The deltas
+may be negative. Note that `time.Time` and all time-related types in this
+package have a convenient `.Date` method that returns this tuple. The
+calculations are performed for the UTC timezone.
+
+As a special case, because the zero value is considered null, calling this on a
+zero date ALWAYS returns the same zero date. This matches general SQL semantics
+of operations involving nulls. Note that the equivalent of zero TIME is not
+`gt.NullDateFrom(0, 0, 0)`, but rather `gt.NullDateFrom(1, 1, 1)`.
+*/
+func (self NullDate) AddDate(years int, months int, days int) NullDate {
+	if self.IsZero() {
+		return self
+	}
+	return NullDateFrom(self.NullTimeUTC().AddDate(years, months, days).Date())
 }
