@@ -284,6 +284,11 @@ func (self NullTime) MaybeTime() *time.Time {
 	return self.TimePtr()
 }
 
+// Shortcut for `gt.NullDateFrom(self.Date())`.
+func (self NullTime) NullDate() NullDate {
+	return NullDateFrom(self.Date())
+}
+
 /*
 Adds the interval to the time, returning the modified time. If the interval is a
 zero value, the resulting time should be identical to the source.

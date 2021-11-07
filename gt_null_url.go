@@ -27,8 +27,8 @@ Variant of `*url.URL` with a less-atrocious API.
 Differences from `*url.URL`:
 
 	* Used by value, not by pointer.
-	* Zero value is considered empty in text, and null in JSON and SQL.
 	* Full support for text, JSON, SQL encoding/decoding.
+	* Zero value is considered empty in text, and null in JSON and SQL.
 	* Easier to use.
 	* Fewer invalid states.
 */

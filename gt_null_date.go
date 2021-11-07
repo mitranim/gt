@@ -24,6 +24,11 @@ func NullDateFrom(year int, month time.Month, day int) NullDate {
 	return NullDate{year, month, day}
 }
 
+// Shortcut for `gt.NullTimeNow().NullDate()`.
+func NullDateNow() NullDate {
+	return NullTimeNow().NullDate()
+}
+
 /*
 Shortcut: parses successfully or panics. Should be used only in root scope. When
 error handling is relevant, use `.Parse`.
@@ -259,7 +264,7 @@ func (self NullDate) Date() (year int, month time.Month, day int) {
 
 // Converts to `gt.NullTime` with `T00:00:00` in the provided timezone.
 func (self NullDate) NullTimeIn(loc *time.Location) NullTime {
-	return NullDateIn(self.Year, self.Month, self.Day, loc)
+	return NullTime(time.Date(self.Year, self.Month, self.Day, 0, 0, 0, 0, loc))
 }
 
 // Converts to `gt.NullTime` with `T00:00:00` in UTC.

@@ -26,6 +26,12 @@ func Test_NullDate(t *testing.T) {
 	})
 }
 
+// This test might fail if invoked precisely at midnight.
+// That would only validate our assumptions.
+func Test_NullDateNow(t *testing.T) {
+	eq(list(time.Now().Date()), list(gt.NullDateNow().Date()))
+}
+
 func Test_Float(t *testing.T) {
 	t.Run(`Decodable/sql.Scanner`, func(t *testing.T) {
 		var (
@@ -89,16 +95,16 @@ func Test_DurationInterval(t *testing.T) {
 
 func Test_Interval(t *testing.T) {
 	t.Run(`Date`, func(t *testing.T) {
-		eq(DateTupleFrom(0, 0, 0), DateTupleFrom(gt.Interval{}.Date()))
+		eq(list(0, 0, 0), list(gt.Interval{}.Date()))
 
-		eq(DateTupleFrom(0, 0, 0), DateTupleFrom(gt.TimeInterval(1, 2, 3).Date()))
-		eq(DateTupleFrom(0, 0, 0), DateTupleFrom(gt.TimeInterval(-1, -2, -3).Date()))
-		eq(DateTupleFrom(1, 2, 3), DateTupleFrom(gt.DateInterval(1, 2, 3).Date()))
-		eq(DateTupleFrom(-1, -2, -3), DateTupleFrom(gt.DateInterval(-1, -2, -3).Date()))
+		eq(list(0, 0, 0), list(gt.TimeInterval(1, 2, 3).Date()))
+		eq(list(0, 0, 0), list(gt.TimeInterval(-1, -2, -3).Date()))
+		eq(list(1, 2, 3), list(gt.DateInterval(1, 2, 3).Date()))
+		eq(list(-1, -2, -3), list(gt.DateInterval(-1, -2, -3).Date()))
 
 		eq(
-			DateTupleFrom(1, 2, 3),
-			DateTupleFrom(gt.IntervalFrom(1, 2, 3, 4, 5, 6).Date()),
+			list(1, 2, 3),
+			list(gt.IntervalFrom(1, 2, 3, 4, 5, 6).Date()),
 		)
 	})
 
@@ -174,6 +180,24 @@ func Test_NullTime(t *testing.T) {
 			gt.NullTimeUTC(1, 2, 3, 4, 5, 6, 0).AddInterval(
 				gt.IntervalFrom(2, 3, 4, 5, 6, 7),
 			),
+		)
+	})
+
+	t.Run(`NullDate`, func(t *testing.T) {
+		eq(
+			gt.NullDateFrom(1, 1, 1),
+			gt.NullTime{}.NullDate(),
+		)
+
+		eq(
+			gt.NullDateFrom(2, 3, 4),
+			gt.NullDateUTC(2, 3, 4).NullDate(),
+		)
+
+		// Might fail at midnight.
+		eq(
+			gt.NullDateNow(),
+			gt.NullTimeNow().NullDate(),
 		)
 	})
 }
