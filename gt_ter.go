@@ -167,12 +167,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self Ter) MarshalText() ([]byte, error) {
-	return nullNilAppend(&self), nil
+	if self.IsNull() {
+		return nil, nil
+	}
+	return self.Append(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *Ter) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -254,9 +261,9 @@ func (self *Ter) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}
@@ -291,7 +298,7 @@ otherwise panics.
 func (self Ter) TryBool() bool {
 	switch self {
 	case TerNull:
-		panic(fmt.Errorf(`[gt] can't convert ternary null to boolean`))
+		panic(errTerNullBool)
 	case TerFalse:
 		return false
 	case TerTrue:

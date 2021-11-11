@@ -102,58 +102,11 @@ func (self Interval) String() string {
 	if self.IsZero() {
 		return zeroInterval
 	}
-	return bytesToMutableString(self.Append(nil))
+	return bytesString(self.Append(nil))
 }
 
 // Implement `gt.Parser`, parsing a valid machine-readable ISO 8601 representation.
-func (self *Interval) Parse(src string) (err error) {
-	/**
-	Regexp-based approach: easy to implement but about 6-10 times slower than
-	decent manual parsing. TODO optimize.
-	*/
-
-	defer errParse(&err, src, `interval`)
-
-	match := reInterval.FindStringSubmatch(src)
-	if match == nil {
-		return fmt.Errorf(`[gt] format mismatch`)
-	}
-
-	var buf Interval
-
-	buf.Years, err = parseIntOpt(match[1])
-	if err != nil {
-		return err
-	}
-
-	buf.Months, err = parseIntOpt(match[2])
-	if err != nil {
-		return err
-	}
-
-	buf.Days, err = parseIntOpt(match[3])
-	if err != nil {
-		return err
-	}
-
-	buf.Hours, err = parseIntOpt(match[4])
-	if err != nil {
-		return err
-	}
-
-	buf.Minutes, err = parseIntOpt(match[5])
-	if err != nil {
-		return err
-	}
-
-	buf.Seconds, err = parseIntOpt(match[6])
-	if err != nil {
-		return err
-	}
-
-	*self = buf
-	return nil
-}
+func (self *Interval) Parse(src string) error { return self.parse(src) }
 
 // Implement `gt.Appender`, using the same representation as `.String`.
 func (self Interval) Append(buf []byte) []byte {
@@ -184,7 +137,7 @@ func (self Interval) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *Interval) UnmarshalText(src []byte) error {
-	return self.Parse(bytesToMutableString(src))
+	return self.Parse(bytesString(src))
 }
 
 // Implement `json.Marshaler`, using the same representation as `.String`.
@@ -194,7 +147,10 @@ func (self Interval) MarshalJSON() ([]byte, error) {
 
 // Implement `json.Unmarshaler`, using the same algorithm as `.Parse`.
 func (self *Interval) UnmarshalJSON(src []byte) error {
-	return jsonUnmarshalString(src, self)
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -234,9 +190,9 @@ func (self *Interval) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}
@@ -375,7 +331,8 @@ func (self Interval) AddSeconds(val int) Interval {
 
 /*
 Adds every field of one interval to every field of another interval, returning
-the sum. Does NOT convert fields between each other.
+the sum. Does NOT convert different time units, such as seconds to minutes or
+vice versa.
 */
 func (self Interval) Add(val Interval) Interval {
 	return Interval{
@@ -390,15 +347,17 @@ func (self Interval) Add(val Interval) Interval {
 
 /*
 Subtracts every field of one interval from every corresponding field of another
-interval, returning the difference. Does NOT convert fields between each
-other.
+interval, returning the difference. Does NOT convert different time units, such
+as seconds to minutes or vice versa.
 */
 func (self Interval) Sub(val Interval) Interval {
 	return self.Add(val.Neg())
 }
 
-// Returns a version of this interval with every field inverted: positive fields
-// become negative, and negative fields become positive.
+/*
+Returns a version of this interval with every field inverted: positive fields
+become negative, and negative fields become positive.
+*/
 func (self Interval) Neg() Interval {
 	return Interval{
 		Years:   -self.Years,

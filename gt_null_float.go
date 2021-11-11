@@ -2,6 +2,7 @@ package gt
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"strconv"
 )
 
@@ -113,12 +114,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self NullFloat) MarshalText() ([]byte, error) {
-	return nullNilAppend(&self), nil
+	if self.IsNull() {
+		return nil, nil
+	}
+	return self.Append(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullFloat) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -126,7 +134,10 @@ Implement `json.Marshaler`. If zero, returns bytes representing `null`.
 Otherwise uses the default `json.Marshal` behavior for `float64`.
 */
 func (self NullFloat) MarshalJSON() ([]byte, error) {
-	return nullJsonMarshalGetter(&self)
+	if self.IsNull() {
+		return bytesNull, nil
+	}
+	return json.Marshal(self.Get())
 }
 
 /*
@@ -135,7 +146,11 @@ zeroes the receiver. Otherwise uses the default `json.Unmarshal` behavior
 for `*float64`.
 */
 func (self *NullFloat) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalGetter(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+	return json.Unmarshal(src, self.GetPtr())
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -258,9 +273,9 @@ func (self *NullFloat) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}

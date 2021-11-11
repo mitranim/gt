@@ -3,7 +3,7 @@ package gt_test
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
+	r "reflect"
 
 	"github.com/mitranim/gt"
 )
@@ -19,7 +19,7 @@ var (
 )
 
 func eq(exp, act interface{}) {
-	if !reflect.DeepEqual(exp, act) {
+	if !r.DeepEqual(exp, act) {
 		panic(fmt.Errorf(`
 expected (detailed):
 	%#[1]v
@@ -34,7 +34,7 @@ actual (simple):
 }
 
 func neq(one, other interface{}) {
-	if reflect.DeepEqual(one, other) {
+	if r.DeepEqual(one, other) {
 		panic(fmt.Errorf(`
 unexpected identical values (detailed):
 	%#[1]v
@@ -45,12 +45,12 @@ unexpected identical values (simple):
 }
 
 func eqPtr(exp, ptr interface{}) {
-	eq(exp, reflect.ValueOf(ptr).Elem().Interface())
+	eq(exp, r.ValueOf(ptr).Elem().Interface())
 }
 
 func fail(err error) {
 	if err == nil {
-		panic("expected failure")
+		panic(`expected error, got none`)
 	}
 }
 
@@ -71,11 +71,11 @@ func tryInterface(val interface{}, err error) interface{} {
 }
 
 func set(ptr, val interface{}) {
-	reflect.ValueOf(ptr).Elem().Set(reflect.ValueOf(val))
+	r.ValueOf(ptr).Elem().Set(r.ValueOf(val))
 }
 
 func setZero(ptr gt.Zeroable) {
-	set(ptr, reflect.Zero(reflect.TypeOf(ptr).Elem()).Interface())
+	set(ptr, r.Zero(r.TypeOf(ptr).Elem()).Interface())
 	eq(true, ptr.IsZero())
 }
 
@@ -83,6 +83,25 @@ func jsonBytes(val interface{}) []byte {
 	return tryByteSlice(json.Marshal(val))
 }
 
-func counter(n int) []struct{} { return make([]struct{}, n) }
+func counter(count int) []struct{} { return make([]struct{}, count) }
 
 func list(vals ...interface{}) []interface{} { return vals }
+
+type intervalPart struct {
+	int
+	string
+}
+
+func intervalParts(suffix string) []intervalPart {
+	return []intervalPart{
+		{0, ``},
+		{0, `0` + suffix},
+		{0, `-0` + suffix},
+		{1, `1` + suffix},
+		{-1, `-1` + suffix},
+		{19, `19` + suffix},
+		{19, `019` + suffix},
+		{-19, `-19` + suffix},
+		{-19, `-019` + suffix},
+	}
+}

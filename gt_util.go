@@ -2,40 +2,10 @@ package gt
 
 import (
 	"bytes"
-	"database/sql"
-	"encoding"
-	"encoding/json"
-	"fmt"
-	"regexp"
 	"strconv"
 	"time"
 	"unsafe"
 )
-
-type zeroerParser interface {
-	Zeroer
-	Parser
-}
-
-type nullableAppender interface {
-	Nullable
-	Appender
-}
-
-type nullableGetter interface {
-	Nullable
-	Getter
-}
-
-type zeroerPtrGetter interface {
-	Zeroer
-	PtrGetter
-}
-
-type zeroerTextUnmarshaler interface {
-	Zeroer
-	encoding.TextUnmarshaler
-}
 
 const (
 	timeFormat   = time.RFC3339
@@ -45,10 +15,10 @@ const (
 	UuidStrLen   = UuidLen * 2
 
 	/**
-	Should be enough for any date <= year 9999, which is the most common use case.
+	Should be enough for any date <= year 999999.
 	TODO compute length dynamically, like we do for intervals.
 	*/
-	dateStrLen = len(dateFormat)
+	dateStrLen = len(dateFormat) + 2
 )
 
 var (
@@ -62,6 +32,8 @@ var (
 	ptrTrue     = &staticTrue
 
 	uuidStrZero [UuidStrLen]byte
+
+	charsetDigitDec = new(charset).add(`0123456789`)
 )
 
 func try(err error) {
@@ -76,8 +48,7 @@ the standard library. Reasonably safe. Should not be used when the underlying
 byte array is volatile, for example when it's part of a scratch buffer during
 SQL scanning.
 */
-func bytesToMutableString(input []byte) string {
-	// return string(input)
+func bytesString(input []byte) string {
 	return *(*string)(unsafe.Pointer(&input))
 }
 
@@ -88,124 +59,6 @@ memory following the original string.
 */
 func stringToBytesUnsafe(input string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&input))
-}
-
-func errScanType(tar, inp interface{}) error {
-	return fmt.Errorf(`[gt] unrecognized input for type %T: type %T, value %v`, tar, inp, inp)
-}
-
-// Original must be passed by pointer to avoid copying.
-func nullGet(isNull bool, enc Getter) interface{} {
-	if isNull {
-		return nil
-	}
-	return enc.Get()
-}
-
-// Original must be passed by pointer to avoid copying.
-func nullStringAppend(isNull bool, enc Appender) string {
-	if isNull {
-		return ``
-	}
-	return bytesToMutableString(enc.Append(nil))
-}
-
-// Original must be passed by pointer to avoid copying.
-func nullStringStringer(isNull bool, enc fmt.Stringer) string {
-	if isNull {
-		return ``
-	}
-	return enc.String()
-}
-
-// Originals must be passed by pointers.
-func nullParse(src string, zeroer Zeroer, parser Parser) error {
-	if len(src) == 0 {
-		zeroer.Zero()
-		return nil
-	}
-	return parser.Parse(src)
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullAppend(buf []byte, isNull bool, enc Appender) []byte {
-	if isNull {
-		return buf
-	}
-	return enc.Append(buf)
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullNilAppend(enc nullableAppender) []byte {
-	return nullAppend(nil, enc.IsNull(), enc)
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullTextMarshal(isNull bool, enc encoding.TextMarshaler) ([]byte, error) {
-	if isNull {
-		return nil, nil
-	}
-	return enc.MarshalText()
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullTextUnmarshalParser(src []byte, dec zeroerParser) error {
-	if len(src) == 0 {
-		dec.Zero()
-		return nil
-	}
-	return dec.Parse(bytesToMutableString(src))
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullJsonMarshal(isNull bool, enc json.Marshaler) ([]byte, error) {
-	if isNull {
-		return bytesNull, nil
-	}
-	return enc.MarshalJSON()
-}
-
-// Original should be passed by pointer to avoid copying.
-func nullJsonMarshalGetter(enc nullableGetter) ([]byte, error) {
-	if enc == nil || enc.IsNull() {
-		return bytesNull, nil
-	}
-	return json.Marshal(enc.Get())
-}
-
-// Original must be passed by pointer.
-func nullJsonUnmarshalGetter(src []byte, dec zeroerPtrGetter) error {
-	if isJsonEmpty(src) {
-		dec.Zero()
-		return nil
-	}
-	return json.Unmarshal(src, dec.GetPtr())
-}
-
-func jsonUnmarshalString(src []byte, dec encoding.TextUnmarshaler) error {
-	if isJsonStr(src) {
-		return dec.UnmarshalText(cutJsonStr(src))
-	}
-	return fmt.Errorf(`[gt] can't decode %q into %T: expected string`, src, dec)
-}
-
-func nullJsonUnmarshalString(src []byte, dec zeroerTextUnmarshaler) error {
-	if isJsonEmpty(src) {
-		dec.Zero()
-		return nil
-	}
-	return jsonUnmarshalString(src, dec)
-}
-
-func scanGetter(src interface{}, tar sql.Scanner) (bool, error) {
-	impl, _ := src.(Getter)
-	if impl != nil {
-		val := impl.Get()
-		if val != src {
-			return true, tar.Scan(val)
-		}
-	}
-	return false, nil
 }
 
 /*
@@ -222,19 +75,6 @@ func isJsonStr(val []byte) bool {
 
 func cutJsonStr(val []byte) []byte {
 	return val[1 : len(val)-1]
-}
-
-func errParse(ptr *error, src string, typ string) {
-	if *ptr != nil {
-		*ptr = fmt.Errorf(`[gt] failed to parse %q into %v: %w`, src, typ, *ptr)
-	}
-}
-
-func errInvalidChar(src string, i int) error {
-	for _, char := range src[i:] {
-		return fmt.Errorf(`[gt] invalid character %q in position %v`, char, i)
-	}
-	return fmt.Errorf(`[gt] invalid character`)
 }
 
 func hexDecode(a, b byte) (byte, bool) {
@@ -303,62 +143,6 @@ func intStrLen(val int) (out int) {
 }
 
 /*
-var decBools = [255]bool{
-	'0': true,
-	'1': true,
-	'2': true,
-	'3': true,
-	'4': true,
-	'5': true,
-	'6': true,
-	'7': true,
-	'8': true,
-	'9': true,
-}
-
-func isDecDigit(val byte) bool { return decBools[val] }
-
-func prefixNumLen(src string) int {
-	var hasDigit bool
-
-	for i := 0; i < len(src); i++ {
-		char := src[i]
-		if i == 0 && (char == '-' || char == '+') {
-			continue
-		}
-
-		if isDecDigit(char) {
-			hasDigit = true
-			continue
-		}
-
-		if hasDigit {
-			return i
-		}
-	}
-
-	return 0
-}
-
-func parseInt(src string) (val int, size int) {
-	size = prefixNumLen(src)
-	if size > 0 {
-		var err error
-		val, err = strconv.Atoi(src[:size])
-		try(err)
-	}
-	return
-}
-*/
-
-func parseIntOpt(src string) (int, error) {
-	if len(src) == 0 {
-		return 0, nil
-	}
-	return strconv.Atoi(src)
-}
-
-/*
 See https://en.wikipedia.org/wiki/Universally_unique_identifier
 
 Array indexes correspond to UUID bytes, values correspond to characters in a
@@ -371,10 +155,6 @@ var uuidGroups = [16][2]int{
 	{19, 20}, {21, 22},
 	{24, 25}, {26, 27}, {28, 29}, {30, 31}, {32, 33}, {34, 35},
 }
-
-var reInterval = regexp.MustCompile(
-	`^P(?:(-?\d+)Y)?(?:(-?\d+)M)?(?:(-?\d+)D)?(?:T(?:(-?\d+)H)?(?:(-?\d+)M)?(?:(-?\d+)S)?)?$`,
-)
 
 func addIntervalPartLen(ptr *int, val int) {
 	if val != 0 {
@@ -400,4 +180,42 @@ func growBytes(chunk []byte, size int) []byte {
 	buf := bytes.NewBuffer(chunk)
 	buf.Grow(size)
 	return buf.Bytes()
+}
+
+func get(src interface{}) (interface{}, bool) {
+	impl, _ := src.(Getter)
+	if impl != nil {
+		val := impl.Get()
+		if val != src {
+			return val, true
+		}
+	}
+	return nil, false
+}
+
+type charset [256]bool
+
+func (self *charset) has(val byte) bool { return self[val] }
+
+func (self *charset) add(vals string) *charset {
+	for _, val := range vals {
+		self[val] = true
+	}
+	return self
+}
+
+// Must be deferred.
+func rec(ptr *error) {
+	val := recover()
+	if val == nil {
+		return
+	}
+
+	err, _ := val.(error)
+	if err != nil {
+		*ptr = err
+		return
+	}
+
+	panic(val)
 }

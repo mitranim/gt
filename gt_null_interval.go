@@ -57,7 +57,10 @@ Implement `gt.Getter`. If zero, returns `nil`, otherwise uses `.String` to
 return a string representation.
 */
 func (self NullInterval) Get() interface{} {
-	return nullGet(self.IsNull(), (*Interval)(&self))
+	if self.IsNull() {
+		return nil
+	}
+	return Interval(self).Get()
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
@@ -71,7 +74,10 @@ Implement `fmt.Stringer`. If zero, returns an empty string. Otherwise returns a
 text representation in the standard machine-readable ISO 8601 format.
 */
 func (self NullInterval) String() string {
-	return nullStringStringer(self.IsNull(), (*Interval)(&self))
+	if self.IsNull() {
+		return ``
+	}
+	return Interval(self).String()
 }
 
 /*
@@ -79,12 +85,19 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 requires a valid machine-readable ISO 8601 representation.
 */
 func (self *NullInterval) Parse(src string) (err error) {
-	return nullParse(src, self, (*Interval)(self))
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return (*Interval)(self).Parse(src)
 }
 
 // Implement `gt.Appender`, using the same representation as `.String`.
 func (self NullInterval) Append(buf []byte) []byte {
-	return nullAppend(buf, self.IsNull(), (*Interval)(&self))
+	if self.IsNull() {
+		return buf
+	}
+	return Interval(self).Append(buf)
 }
 
 /*
@@ -92,12 +105,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self NullInterval) MarshalText() ([]byte, error) {
-	return nullTextMarshal(self.IsNull(), (*Interval)(&self))
+	if self.IsNull() {
+		return nil, nil
+	}
+	return Interval(self).MarshalText()
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullInterval) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -106,7 +126,10 @@ Otherwise returns bytes representing a JSON string with the same text as in
 `.String`.
 */
 func (self NullInterval) MarshalJSON() ([]byte, error) {
-	return nullJsonMarshal(self.IsNull(), (*Interval)(&self))
+	if self.IsNull() {
+		return bytesNull, nil
+	}
+	return Interval(self).MarshalJSON()
 }
 
 /*
@@ -115,7 +138,16 @@ zeroes the receiver. Otherwise parses a JSON string, using the same algorithm
 as `.Parse`.
 */
 func (self *NullInterval) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalString(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -178,9 +210,9 @@ func (self *NullInterval) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}
@@ -283,7 +315,8 @@ func (self NullInterval) AddSeconds(val int) NullInterval {
 
 /*
 Adds every field of one interval to every field of another interval, returning
-the sum. Does NOT convert fields between each other.
+the sum. Does NOT convert different time units, such as seconds to minutes or
+vice versa.
 */
 func (self NullInterval) Add(val NullInterval) NullInterval {
 	return NullInterval(Interval(self).Add(Interval(val)))
@@ -291,15 +324,17 @@ func (self NullInterval) Add(val NullInterval) NullInterval {
 
 /*
 Subtracts every field of one interval from every corresponding field of another
-interval, returning the difference. Does NOT convert fields between each
-other.
+interval, returning the difference. Does NOT convert different time units, such
+as seconds to minutes or vice versa.
 */
 func (self NullInterval) Sub(val NullInterval) NullInterval {
 	return NullInterval(Interval(self).Sub(Interval(val)))
 }
 
-// Returns a version of this interval with every field inverted: positive fields
-// become negative, and negative fields become positive.
+/*
+Returns a version of this interval with every field inverted: positive fields
+become negative, and negative fields become positive.
+*/
 func (self NullInterval) Neg() NullInterval {
 	return NullInterval(Interval(self).Neg())
 }

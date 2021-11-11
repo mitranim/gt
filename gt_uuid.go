@@ -87,7 +87,7 @@ Implement `fmt.Stringer`, returning a simplified text representation: lowercase
 without dashes.
 */
 func (self Uuid) String() string {
-	return bytesToMutableString(self.Append(nil))
+	return bytesString(self.Append(nil))
 }
 
 /*
@@ -104,7 +104,7 @@ func (self *Uuid) Parse(src string) (err error) {
 	case 36:
 		return self.maybeSet(uuidParseCanon(src))
 	default:
-		return fmt.Errorf(`[gt] unrecognized length`)
+		return errUnrecLength
 	}
 }
 
@@ -122,7 +122,7 @@ func (self Uuid) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *Uuid) UnmarshalText(src []byte) error {
-	return self.Parse(bytesToMutableString(src))
+	return self.Parse(bytesString(src))
 }
 
 // Implement `json.Marshaler`, using the same representation as `.String`.
@@ -136,7 +136,10 @@ func (self Uuid) MarshalJSON() ([]byte, error) {
 
 // Implement `json.Unmarshaler`, using the same algorithm as `.Parse`.
 func (self *Uuid) UnmarshalJSON(src []byte) error {
-	return jsonUnmarshalString(src, self)
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -174,9 +177,9 @@ func (self *Uuid) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}
@@ -213,7 +216,7 @@ func (self *Uuid) maybeSet(val Uuid, err error) error {
 
 func uuidParseSimple(src string) (val Uuid, err error) {
 	if len(src) != 32 {
-		err = fmt.Errorf(`[gt] length mismatch`)
+		err = errLengthMismatch
 		return
 	}
 	_, err = hex.Decode(val[:], stringToBytesUnsafe(src))
@@ -222,19 +225,19 @@ func uuidParseSimple(src string) (val Uuid, err error) {
 
 func uuidParseCanon(src string) (val Uuid, err error) {
 	if len(src) != 36 {
-		err = fmt.Errorf(`[gt] length mismatch`)
+		err = errLengthMismatch
 		return
 	}
 
 	if !(src[8] == '-' && src[13] == '-' && src[18] == '-' && src[23] == '-') {
-		err = fmt.Errorf(`[gt] format mismatch`)
+		err = errFormatMismatch
 		return
 	}
 
 	for i, pair := range uuidGroups {
 		char, ok := hexDecode(src[pair[0]], src[pair[1]])
 		if !ok {
-			err = errInvalidChar(src, pair[0])
+			err = errInvalidCharAt(src, pair[0])
 			return
 		}
 		val[i] = char

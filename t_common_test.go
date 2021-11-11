@@ -1,7 +1,7 @@
 package gt_test
 
 import (
-	"reflect"
+	r "reflect"
 	"testing"
 	"time"
 
@@ -10,7 +10,7 @@ import (
 
 // TODO: test various invalid inputs.
 // TODO: verify that we can decode both RFC3339 timestamps and short dates.
-func Test_NullDate_common(t *testing.T) {
+func TestNullDate_common(t *testing.T) {
 	var (
 		primZero    = time.Time{}
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
@@ -30,7 +30,7 @@ func Test_NullDate_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullFloat_common(t *testing.T) {
+func TestNullFloat_common(t *testing.T) {
 	var (
 		primZero    = float64(0)
 		primNonZero = float64(123)
@@ -50,7 +50,7 @@ func Test_NullFloat_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullInt_common(t *testing.T) {
+func TestNullInt_common(t *testing.T) {
 	var (
 		primZero    = int64(0)
 		primNonZero = int64(123)
@@ -71,7 +71,7 @@ func Test_NullInt_common(t *testing.T) {
 
 // TODO: test various invalid inputs.
 // TODO: more tests for encoding and decoding.
-func Test_Interval_common(t *testing.T) {
+func TestInterval_common(t *testing.T) {
 	var (
 		primZero    = `PT0S`
 		primNonZero = `P1Y2M3DT4H5M6S`
@@ -92,7 +92,7 @@ func Test_Interval_common(t *testing.T) {
 
 // TODO: test various invalid inputs.
 // TODO: more tests for encoding and decoding.
-func Test_NullInterval_common(t *testing.T) {
+func TestNullInterval_common(t *testing.T) {
 	var (
 		primZero    = ``
 		primNonZero = `P1Y2M3DT4H5M6S`
@@ -111,7 +111,7 @@ func Test_NullInterval_common(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
-func Test_NullString_common(t *testing.T) {
+func TestNullString_common(t *testing.T) {
 	var (
 		primZero    = string(``)
 		primNonZero = string(`123`)
@@ -131,7 +131,7 @@ func Test_NullString_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullTime_common(t *testing.T) {
+func TestNullTime_common(t *testing.T) {
 	var (
 		primZero    = time.Time{}
 		primNonZero = time.Date(1234, 5, 6, 0, 0, 0, 0, time.UTC)
@@ -151,7 +151,7 @@ func Test_NullTime_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullUint_common(t *testing.T) {
+func TestNullUint_common(t *testing.T) {
 	var (
 		primZero    = uint64(0)
 		primNonZero = uint64(123)
@@ -171,7 +171,7 @@ func Test_NullUint_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullUrl_common(t *testing.T) {
+func TestNullUrl_common(t *testing.T) {
 	var (
 		primZero    = ``
 		primNonZero = `https://example.com`
@@ -191,7 +191,7 @@ func Test_NullUrl_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullUuid_common(t *testing.T) {
+func TestNullUuid_common(t *testing.T) {
 	var (
 		primZero    = ``
 		primNonZero = [gt.UuidLen]byte{0xae, 0x68, 0xcc, 0xca, 0x87, 0xc3, 0x44, 0xaf, 0xa8, 0xa0, 0x20, 0x9c, 0xe, 0x20, 0x53, 0x43}
@@ -211,7 +211,7 @@ func Test_NullUuid_common(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_Uuid_common(t *testing.T) {
+func TestUuid_common(t *testing.T) {
 	var (
 		primZero    = [gt.UuidLen]byte{}
 		primNonZero = [gt.UuidLen]byte{0xae, 0x68, 0xcc, 0xca, 0x87, 0xc3, 0x44, 0xaf, 0xa8, 0xa0, 0x20, 0x9c, 0xe, 0x20, 0x53, 0x43}
@@ -237,7 +237,7 @@ TODO:
 	* Ensure all three states are tested.
 	* Test various auxiliary methods.
 */
-func Test_Ter_common(t *testing.T) {
+func TestTer_common(t *testing.T) {
 	var (
 		primZero    = interface{}(nil)
 		primNonZero = true
@@ -266,9 +266,9 @@ func testAny(
 ) {
 	// Note: `primZero` is not tested here because it doesn't have to be Go zero.
 	t.Run(`zeros`, func(t *testing.T) {
-		eq(true, reflect.ValueOf(zero).IsZero())
-		eq(false, reflect.ValueOf(primNonZero).IsZero())
-		eq(false, reflect.ValueOf(nonZero).IsZero())
+		eq(true, r.ValueOf(zero).IsZero())
+		eq(false, r.ValueOf(primNonZero).IsZero())
+		eq(false, r.ValueOf(nonZero).IsZero())
 	})
 
 	t.Run(`Encodable`, func(t *testing.T) {
@@ -315,7 +315,7 @@ func testAny(
 
 	t.Run(`Decodable`, func(t *testing.T) {
 		t.Run(`Zeroer`, func(t *testing.T) {
-			rval := reflect.ValueOf(dec).Elem()
+			rval := r.ValueOf(dec).Elem()
 			eq(true, rval.IsZero())
 
 			set(dec, nonZero)

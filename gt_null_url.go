@@ -15,7 +15,7 @@ func ParseNullUrl(src string) (val NullUrl) {
 	return
 }
 
-// Safe cast. Like `gt.NullUrl(*src)` but also accepts nil.
+// Safe cast. Like `gt.NullUrl(*src)` but doesn't panic on nil pointer.
 func ToNullUrl(src *url.URL) (val NullUrl) {
 	val.Set(src)
 	return
@@ -23,7 +23,6 @@ func ToNullUrl(src *url.URL) (val NullUrl) {
 
 /*
 Variant of `*url.URL` with a less-atrocious API.
-
 Differences from `*url.URL`:
 
 	* Used by value, not by pointer.
@@ -112,12 +111,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self NullUrl) MarshalText() ([]byte, error) {
-	return nullNilAppend(&self), nil
+	if self.IsNull() {
+		return nil, nil
+	}
+	return self.Append(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullUrl) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -138,7 +144,16 @@ zeroes the receiver. Otherwise parses a JSON string, using the same algorithm
 as `.Parse`.
 */
 func (self *NullUrl) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalString(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -187,9 +202,9 @@ func (self *NullUrl) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}

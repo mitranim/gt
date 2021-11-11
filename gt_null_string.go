@@ -2,6 +2,7 @@ package gt
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 )
 
 /*
@@ -83,7 +84,10 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 string as-is.
 */
 func (self NullString) MarshalText() ([]byte, error) {
-	return nullNilAppend(&self), nil
+	if self.IsNull() {
+		return nil, nil
+	}
+	return self.Append(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, assigning the string as-is.
@@ -97,7 +101,10 @@ Implement `json.Marshaler`. If zero, returns bytes representing `null`.
 Otherwise uses the default `json.Marshal` behavior for `string`.
 */
 func (self NullString) MarshalJSON() ([]byte, error) {
-	return nullJsonMarshalGetter(&self)
+	if self.IsNull() {
+		return bytesNull, nil
+	}
+	return json.Marshal(self.Get())
 }
 
 /*
@@ -106,7 +113,11 @@ zeroes the receiver. Otherwise uses the default `json.Unmarshal` behavior
 for `*string`.
 */
 func (self *NullString) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalGetter(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+	return json.Unmarshal(src, self.GetPtr())
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -139,10 +150,14 @@ func (self *NullString) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}
 }
+
+// Same as `len(self)`. Sometimes handy when embedding `gt.NullString` in
+// single-valued structs.
+func (self NullString) Len() int { return len(self) }

@@ -97,7 +97,10 @@ Implement `fmt.Stringer`. If zero, returns an empty string. Otherwise returns a
 text representation in the standard machine-readable ISO 8601 format.
 */
 func (self NullDate) String() string {
-	return nullStringAppend(self.IsNull(), &self)
+	if self.IsNull() {
+		return ``
+	}
+	return bytesString(self.Append(nil))
 }
 
 /*
@@ -134,7 +137,10 @@ func (self NullDate) Append(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
+
+	// `time.Time.AppendFormat` doesn't seem to do this.
 	buf = growBytes(buf, dateStrLen)
+
 	return self.TimeUTC().AppendFormat(buf, dateFormat)
 }
 
@@ -143,12 +149,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self NullDate) MarshalText() ([]byte, error) {
-	return nullNilAppend(&self), nil
+	if self.IsNull() {
+		return nil, nil
+	}
+	return self.Append(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullDate) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -175,7 +188,16 @@ zeroes the receiver. Otherwise parses a JSON string, using the same algorithm
 as `.Parse`.
 */
 func (self *NullDate) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalString(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -229,9 +251,9 @@ func (self *NullDate) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}

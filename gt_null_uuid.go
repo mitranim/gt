@@ -73,7 +73,10 @@ Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `[16]byte`
 understood by many DB drivers.
 */
 func (self NullUuid) Get() interface{} {
-	return nullGet(self.IsNull(), (*Uuid)(&self))
+	if self.IsNull() {
+		return nil
+	}
+	return Uuid(self).Get()
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
@@ -87,7 +90,10 @@ Implement `fmt.Stringer`. If zero, returns an empty string. Otherwise returns a
 simplified text representation: lowercase without dashes.
 */
 func (self NullUuid) String() string {
-	return nullStringStringer(self.IsNull(), (*Uuid)(&self))
+	if self.IsNull() {
+		return ``
+	}
+	return Uuid(self).String()
 }
 
 /*
@@ -96,12 +102,19 @@ requires a valid UUID representation. Supports both the short format without
 dashes, and the canonical format with dashes. Parsing is case-insensitive.
 */
 func (self *NullUuid) Parse(src string) (err error) {
-	return nullParse(src, self, (*Uuid)(self))
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return (*Uuid)(self).Parse(src)
 }
 
 // Implement `gt.Appender`, using the same representation as `.String`.
 func (self NullUuid) Append(buf []byte) []byte {
-	return nullAppend(buf, self.IsNull(), (*Uuid)(&self))
+	if self.IsNull() {
+		return buf
+	}
+	return Uuid(self).Append(buf)
 }
 
 /*
@@ -109,12 +122,19 @@ Implement `encoding.TextMarhaler`. If zero, returns nil. Otherwise returns the
 same representation as `.String`.
 */
 func (self NullUuid) MarshalText() ([]byte, error) {
-	return nullTextMarshal(self.IsNull(), (*Uuid)(&self))
+	if self.IsNull() {
+		return nil, nil
+	}
+	return Uuid(self).MarshalText()
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullUuid) UnmarshalText(src []byte) error {
-	return nullTextUnmarshalParser(src, self)
+	if len(src) == 0 {
+		self.Zero()
+		return nil
+	}
+	return self.Parse(bytesString(src))
 }
 
 /*
@@ -123,7 +143,10 @@ Otherwise returns bytes representing a JSON string with the same text as in
 `.String`.
 */
 func (self NullUuid) MarshalJSON() ([]byte, error) {
-	return nullJsonMarshal(self.IsNull(), (*Uuid)(&self))
+	if self.IsNull() {
+		return bytesNull, nil
+	}
+	return Uuid(self).MarshalJSON()
 }
 
 /*
@@ -132,7 +155,16 @@ zeroes the receiver. Otherwise parses a JSON string, using the same algorithm
 as `.Parse`.
 */
 func (self *NullUuid) UnmarshalJSON(src []byte) error {
-	return nullJsonUnmarshalString(src, self)
+	if isJsonEmpty(src) {
+		self.Zero()
+		return nil
+	}
+
+	if isJsonStr(src) {
+		return self.UnmarshalText(cutJsonStr(src))
+	}
+
+	return errJsonString(src, self)
 }
 
 // Implement `driver.Valuer`, using `.Get`.
@@ -185,9 +217,9 @@ func (self *NullUuid) Scan(src interface{}) error {
 		return nil
 
 	default:
-		ok, err := scanGetter(src, self)
-		if ok || err != nil {
-			return err
+		val, ok := get(src)
+		if ok {
+			return self.Scan(val)
 		}
 		return errScanType(self, src)
 	}

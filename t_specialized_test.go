@@ -8,7 +8,7 @@ import (
 	"github.com/mitranim/gt"
 )
 
-func Test_NullDate(t *testing.T) {
+func TestNullDate(t *testing.T) {
 	t.Run(`String`, func(t *testing.T) {
 		eq(``, gt.NullDateFrom(0, 0, 0).String())
 		eq(`0001-01-01`, gt.NullDateFrom(1, 1, 1).String())
@@ -28,11 +28,11 @@ func Test_NullDate(t *testing.T) {
 
 // This test might fail if invoked precisely at midnight.
 // That would only validate our assumptions.
-func Test_NullDateNow(t *testing.T) {
+func TestNullDateNow(t *testing.T) {
 	eq(list(time.Now().Date()), list(gt.NullDateNow().Date()))
 }
 
-func Test_Float(t *testing.T) {
+func TestFloat(t *testing.T) {
 	t.Run(`Decodable/sql.Scanner`, func(t *testing.T) {
 		var (
 			primZero    = float64(0)
@@ -50,7 +50,7 @@ func Test_Float(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullInt(t *testing.T) {
+func TestNullInt(t *testing.T) {
 	t.Run(`Decodable/sql.Scanner`, func(t *testing.T) {
 		var (
 			primZero    = int64(0)
@@ -79,7 +79,7 @@ func Test_NullInt(t *testing.T) {
 	})
 }
 
-func Test_DurationInterval(t *testing.T) {
+func TestDurationInterval(t *testing.T) {
 	eq(gt.Interval{Seconds: 1}, gt.DurationInterval(time.Second))
 	eq(gt.Interval{Minutes: 1}, gt.DurationInterval(time.Minute))
 	eq(gt.Interval{Hours: 1}, gt.DurationInterval(time.Hour))
@@ -93,7 +93,78 @@ func Test_DurationInterval(t *testing.T) {
 	eq(gt.Interval{Hours: 12, Minutes: 34, Seconds: 0}, gt.DurationInterval(time.Hour*12+time.Minute*34+time.Second*0))
 }
 
-func Test_Interval(t *testing.T) {
+func TestInterval(t *testing.T) {
+	t.Run(`Parse invalid`, func(t *testing.T) {
+		test := func(src string) {
+			t.Helper()
+			fail(new(gt.Interval).Parse(src))
+		}
+
+		test(``)
+		test(` `)
+		test(`1Y`)
+		test(`1H`)
+		test(`T1H`)
+		test(`P0`)
+		test(`PT0`)
+		test(`P-`)
+		test(`P-0`)
+		test(`P-1`)
+		test(`PT-`)
+		test(`PT-0`)
+		test(`PT-1`)
+		test(`P1Y-`)
+		test(`P1Y-0`)
+		test(`P1Y-1`)
+		test(`P1YT-`)
+		test(`P1YT-0`)
+		test(`P1YT-1`)
+		test(`P--0Y`)
+		test(`PT--0H`)
+		test(`P+0Y`)
+		test(`PT+0H`)
+	})
+
+	t.Run(`Parse`, func(t *testing.T) {
+		test := func(exp gt.Interval, src string) {
+			t.Helper()
+			tar := gt.ParseInterval(src)
+			if exp != tar {
+				t.Logf(`failure when parsing %q`, src)
+			}
+			eq(exp, tar)
+		}
+
+		for _, year := range intervalParts(`Y`) {
+			for _, month := range intervalParts(`M`) {
+				for _, day := range intervalParts(`D`) {
+					YMD := year.string + month.string + day.string
+
+					test(
+						gt.DateInterval(year.int, month.int, day.int),
+						`P`+YMD,
+					)
+
+					test(
+						gt.DateInterval(year.int, month.int, day.int),
+						`P`+YMD+`T`,
+					)
+
+					for _, hour := range intervalParts(`H`) {
+						for _, minute := range intervalParts(`M`) {
+							for _, second := range intervalParts(`S`) {
+								test(
+									gt.IntervalFrom(year.int, month.int, day.int, hour.int, minute.int, second.int),
+									`P`+YMD+`T`+hour.string+minute.string+second.string,
+								)
+							}
+						}
+					}
+				}
+			}
+		}
+	})
+
 	t.Run(`Date`, func(t *testing.T) {
 		eq(list(0, 0, 0), list(gt.Interval{}.Date()))
 
@@ -135,7 +206,7 @@ func Test_Interval(t *testing.T) {
 	})
 }
 
-func Test_NullTime(t *testing.T) {
+func TestNullTime(t *testing.T) {
 	t.Run(`Before`, func(t *testing.T) {
 		eq(false, gt.NullTime{}.Before(gt.NullTime{}))
 		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullTime{}))
@@ -203,7 +274,7 @@ func Test_NullTime(t *testing.T) {
 }
 
 // TODO: test various invalid inputs.
-func Test_NullUint(t *testing.T) {
+func TestNullUint(t *testing.T) {
 	var (
 		primZero    = uint64(0)
 		primNonZero = uint64(123)
@@ -232,42 +303,42 @@ func Test_NullUint(t *testing.T) {
 	})
 }
 
-func Test_NullUrl_GoString(t *testing.T) {
+func TestNullUrl_GoString(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq(`gt.NullUrl{}`, fmt.Sprintf(`%#v`, gt.NullUrl{}))
 		eq("gt.ParseNullUrl(`one://two.three/four?five=six#seven`)", fmt.Sprintf(`%#v`, gt.ParseNullUrl(`one://two.three/four?five=six#seven`)))
 	})
 }
 
-func Test_ParseNullUuid(t *testing.T) {
+func TestParseNullUuid(t *testing.T) {
 	eq(``, gt.ParseNullUuid(``).String())
 	eq(`ddf1bfce018c4bef898ba4f293946049`, gt.ParseNullUuid(`ddf1bfce018c4bef898ba4f293946049`).String())
 	eq(`ddf1bfce018c4bef898ba4f293946049`, gt.ParseNullUuid(`ddf1bfce-018c-4bef-898b-a4f293946049`).String())
 }
 
 // TODO: test versioning.
-func Test_RandomNullUuid(t *testing.T) {
+func TestRandomNullUuid(t *testing.T) {
 	eq(false, gt.RandomNullUuid().IsZero())
 	eq(false, gt.RandomNullUuid().IsZero())
 	neq(gt.RandomNullUuid(), gt.RandomNullUuid())
 	neq(gt.RandomNullUuid(), gt.RandomNullUuid())
 }
 
-func Test_NullUuid(t *testing.T) {
+func TestNullUuid(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq("gt.NullUuid{}", fmt.Sprintf(`%#v`, gt.NullUuid{}))
 		eq("gt.ParseNullUuid(`b85ae23dc3f4468995d688e1ee645501`)", fmt.Sprintf(`%#v`, gt.ParseNullUuid(`b85ae23dc3f4468995d688e1ee645501`)))
 	})
 }
 
-func Test_Uuid(t *testing.T) {
+func TestUuid(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq("gt.ParseUuid(`00000000000000000000000000000000`)", fmt.Sprintf(`%#v`, gt.Uuid{}))
 		eq("gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)", fmt.Sprintf(`%#v`, gt.ParseUuid(`b85ae23dc3f4468995d688e1ee645501`)))
 	})
 }
 
-func Test_Ter(t *testing.T) {
+func TestTer(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq(`gt.TerNull`, fmt.Sprintf(`%#v`, gt.Ter(0)))
 		eq(`gt.TerNull`, fmt.Sprintf(`%#v`, gt.TerNull))
