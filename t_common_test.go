@@ -256,6 +256,25 @@ func TestTer_common(t *testing.T) {
 	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
 }
 
+func TestRaw_common(t *testing.T) {
+	var (
+		primZero    = interface{}(nil)
+		primNonZero = []byte(`{"hello":"world"}`)
+		textZero    = ``
+		textNonZero = `{"hello":"world"}`
+		jsonZero    = bytesNull
+		jsonNonZero = primNonZero
+		zero        = gt.Raw(nil)
+		nonZero     = gt.Raw(primNonZero)
+		dec         = new(gt.Raw)
+	)
+
+	eq(true, zero.IsNull())
+	eq(false, nonZero.IsNull())
+
+	testAny(t, primZero, primNonZero, textZero, textNonZero, jsonZero, jsonNonZero, zero, nonZero, dec)
+}
+
 func testAny(
 	t *testing.T,
 	primZero, primNonZero interface{},
@@ -326,17 +345,27 @@ func testAny(
 
 			set(dec, nonZero)
 			dec.Zero()
-			eq(true, rval.IsZero())
+
+			/**
+			Slice types such as `Raw` have more than one "zero" state. Going from
+			non-zero to zero may secretly keep the capacity, and the resulting value
+			is not equivalent to true zero.
+			*/
+			if rval.Kind() == r.Slice {
+				eq(0, rval.Len())
+			} else {
+				eq(true, dec.IsZero())
+			}
 		})
 
 		t.Run(`Parser`, func(t *testing.T) {
 			t.Run(`empty`, func(t *testing.T) {
 				set(dec, nonZero)
-				eqPtr(nonZero, dec)
+				eqDeref(nonZero, dec)
 
 				if zero.IsNull() {
 					try(dec.Parse(``))
-					eqPtr(zero, dec)
+					eq(true, dec.IsZero())
 				} else {
 					fail(dec.Parse(``))
 				}
@@ -344,10 +373,10 @@ func testAny(
 
 			t.Run(`non-empty`, func(t *testing.T) {
 				setZero(dec)
-				eqPtr(zero, dec)
+				eq(true, dec.IsZero())
 
 				try(dec.Parse(textNonZero))
-				eqPtr(nonZero, dec)
+				eqDeref(nonZero, dec)
 			})
 		})
 
@@ -355,11 +384,11 @@ func testAny(
 			t.Run(`empty`, func(t *testing.T) {
 				t.Run(`nil bytes`, func(t *testing.T) {
 					set(dec, nonZero)
-					eqPtr(nonZero, dec)
+					eqDeref(nonZero, dec)
 
 					if zero.IsNull() {
 						try(dec.UnmarshalText(nil))
-						eqPtr(zero, dec)
+						eq(true, dec.IsZero())
 					} else {
 						fail(dec.UnmarshalText(nil))
 					}
@@ -367,11 +396,11 @@ func testAny(
 
 				t.Run(`empty bytes`, func(t *testing.T) {
 					set(dec, nonZero)
-					eqPtr(nonZero, dec)
+					eqDeref(nonZero, dec)
 
 					if zero.IsNull() {
 						try(dec.UnmarshalText([]byte{}))
-						eqPtr(zero, dec)
+						eq(true, dec.IsZero())
 					} else {
 						fail(dec.UnmarshalText([]byte{}))
 					}
@@ -380,21 +409,21 @@ func testAny(
 
 			t.Run(`non-empty`, func(t *testing.T) {
 				setZero(dec)
-				eqPtr(zero, dec)
+				eq(true, dec.IsZero())
 
 				try(dec.UnmarshalText([]byte(textNonZero)))
-				eqPtr(nonZero, dec)
+				eqDeref(nonZero, dec)
 			})
 		})
 
 		t.Run(`json.Unmarshaler`, func(t *testing.T) {
 			t.Run(`null`, func(t *testing.T) {
 				set(dec, nonZero)
-				eqPtr(nonZero, dec)
+				eqDeref(nonZero, dec)
 
 				if zero.IsNull() {
 					try(dec.UnmarshalJSON(bytesNull))
-					eqPtr(zero, dec)
+					eq(true, dec.IsZero())
 				} else {
 					fail(dec.UnmarshalJSON(bytesNull))
 				}
@@ -402,10 +431,10 @@ func testAny(
 
 			t.Run(`non-empty`, func(t *testing.T) {
 				setZero(dec)
-				eqPtr(zero, dec)
+				eq(true, dec.IsZero())
 
 				try(dec.UnmarshalJSON(jsonNonZero))
-				eqPtr(nonZero, dec)
+				eqDeref(nonZero, dec)
 			})
 		})
 
@@ -456,11 +485,11 @@ func testScanEmpty(
 	input interface{},
 ) {
 	set(dec, nonZero)
-	eqPtr(nonZero, dec)
+	eqDeref(nonZero, dec)
 
 	if zero.IsNull() {
 		try(dec.Scan(input))
-		eqPtr(zero, dec)
+		eq(true, dec.IsZero())
 	} else {
 		fail(dec.Scan(input))
 	}
@@ -473,8 +502,8 @@ func testScanNonEmpty(
 	input interface{},
 ) {
 	setZero(dec)
-	eqPtr(zero, dec)
+	eq(true, dec.IsZero())
 
 	try(dec.Scan(input))
-	eqPtr(nonZero, dec)
+	eqDeref(nonZero, dec)
 }

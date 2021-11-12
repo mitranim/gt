@@ -44,7 +44,7 @@ unexpected identical values (simple):
 	}
 }
 
-func eqPtr(exp, ptr interface{}) {
+func eqDeref(exp, ptr interface{}) {
 	eq(exp, r.ValueOf(ptr).Elem().Interface())
 }
 

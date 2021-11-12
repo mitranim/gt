@@ -84,7 +84,7 @@ func (self NullInterval) String() string {
 Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 requires a valid machine-readable ISO 8601 representation.
 */
-func (self *NullInterval) Parse(src string) (err error) {
+func (self *NullInterval) Parse(src string) error {
 	if len(src) == 0 {
 		self.Zero()
 		return nil

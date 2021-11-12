@@ -1,7 +1,6 @@
 package gt
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"encoding"
 	"encoding/json"
@@ -66,6 +65,9 @@ numbers) or also supports decoding (`time.Time`).
 */
 type PtrGetter interface{ GetPtr() interface{} }
 
+// Copy of `"database/sql".Scanner` to avoid a big import.
+type Scanner interface{ Scan(interface{}) error }
+
 /*
 Implemented by all types in this package. Various methods implemented on value
 types, rather than pointer types, for converting the value to another
@@ -93,5 +95,5 @@ type Decodable interface {
 	Appender
 	encoding.TextUnmarshaler
 	json.Unmarshaler
-	sql.Scanner
+	Scanner
 }

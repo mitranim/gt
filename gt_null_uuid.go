@@ -101,7 +101,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 requires a valid UUID representation. Supports both the short format without
 dashes, and the canonical format with dashes. Parsing is case-insensitive.
 */
-func (self *NullUuid) Parse(src string) (err error) {
+func (self *NullUuid) Parse(src string) error {
 	if len(src) == 0 {
 		self.Zero()
 		return nil
