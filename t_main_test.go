@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	r "reflect"
+	"runtime"
+	"strings"
+	"testing"
+	"unsafe"
 
 	"github.com/mitranim/gt"
 )
@@ -44,8 +48,78 @@ unexpected identical values (simple):
 	}
 }
 
+func panics(t testing.TB, msg string, fun func()) {
+	t.Helper()
+	val := catchAny(fun)
+
+	if val == nil {
+		t.Fatalf(`expected %v to panic, found no panic`, funcName(fun))
+	}
+
+	str := fmt.Sprint(val)
+	if !strings.Contains(str, msg) {
+		t.Fatalf(`
+expected %v to panic with a message containing:
+	%v
+found the following message:
+	%v
+`, funcName(fun), msg, str)
+	}
+}
+
+func funcName(val interface{}) string {
+	return runtime.FuncForPC(r.ValueOf(val).Pointer()).Name()
+}
+
+func catchAny(fun func()) (val interface{}) {
+	defer recAny(&val)
+	fun()
+	return
+}
+
+func recAny(ptr *interface{}) { *ptr = recover() }
+
 func eqDeref(exp, ptr interface{}) {
 	eq(exp, r.ValueOf(ptr).Elem().Interface())
+}
+
+// nolint:structcheck
+type slice struct {
+	dat uintptr
+	len int
+	cap int
+}
+
+func sliceShared(prev, next []byte) {
+	prevSlice := *(*slice)(unsafe.Pointer(&prev))
+	nextSlice := *(*slice)(unsafe.Pointer(&next))
+
+	if prevSlice.dat != nextSlice.dat {
+		panic(errSlices(`two slices unexpectedly don't share the backing array`, prev, next))
+	}
+}
+
+func sliceNotShared(prev, next []byte) {
+	prevSlice := *(*slice)(unsafe.Pointer(&prev))
+	nextSlice := *(*slice)(unsafe.Pointer(&next))
+
+	if prevSlice.dat == nextSlice.dat {
+		panic(errSlices(`two slices unexpectedly share the backing array`, prev, next))
+	}
+}
+
+func errSlices(prefix string, prev, next []byte) error {
+	return fmt.Errorf(`
+%[1]v;
+prev (detailed):
+	%#[2]v
+next (detailed):
+	%#[3]v
+prev (simple):
+	%[2]q
+next (simple):
+	%[3]q
+`, prefix, prev, next)
 }
 
 func fail(err error) {
@@ -105,3 +179,18 @@ func intervalParts(suffix string) []intervalPart {
 		{-19, `-019` + suffix},
 	}
 }
+
+func pathSegments(val string) []string {
+	return []string{
+		val,
+		`/` + val,
+		val + `/`,
+		`/` + val + `/`,
+	}
+}
+
+var (
+	pathSegmentsOne   = pathSegments(`one`)
+	pathSegmentsTwo   = pathSegments(`two`)
+	pathSegmentsThree = pathSegments(`three`)
+)

@@ -126,6 +126,10 @@ func TestInterval(t *testing.T) {
 	})
 
 	t.Run(`Parse`, func(t *testing.T) {
+		if testing.Short() {
+			t.Skip(`takes too long (half a second)`)
+		}
+
 		test := func(exp gt.Interval, src string) {
 			t.Helper()
 			tar := gt.ParseInterval(src)
@@ -303,7 +307,66 @@ func TestNullUint(t *testing.T) {
 	})
 }
 
-func TestNullUrl_GoString(t *testing.T) {
+func TestJoin_invalid(t *testing.T) {
+	test := func(src, msg string, vals []string) {
+		t.Helper()
+		panics(t, msg, func() { gt.Join(vals...) })
+	}
+
+	test(``, `[gt] unexpected empty URL segment`, []string{`one`, ``})
+	test(``, `[gt] unexpected empty URL segment`, []string{``, `one`})
+
+	test(``, `[gt] unexpected invalid URL segment ".."`, []string{`..`})
+	test(``, `[gt] unexpected invalid URL segment "/.."`, []string{`/..`})
+	test(``, `[gt] unexpected invalid URL segment "../one"`, []string{`../one`})
+	test(``, `[gt] unexpected invalid URL segment "/../one"`, []string{`/../one`})
+
+	test(``, `[gt] unexpected invalid URL segment ".."`, []string{`one`, `..`})
+	test(``, `[gt] unexpected invalid URL segment "/.."`, []string{`one`, `/..`})
+	test(``, `[gt] unexpected invalid URL segment "../one"`, []string{`one`, `../one`})
+	test(``, `[gt] unexpected invalid URL segment "/../one"`, []string{`one`, `/../one`})
+
+	test(``, `[gt] unexpected invalid URL segment ".."`, []string{`..`, `one`})
+	test(``, `[gt] unexpected invalid URL segment "/.."`, []string{`/..`, `one`})
+	test(``, `[gt] unexpected invalid URL segment "../one"`, []string{`../one`, `one`})
+	test(``, `[gt] unexpected invalid URL segment "/../one"`, []string{`/../one`, `one`})
+}
+
+func TestJoin_valid(t *testing.T) {
+	test := func(exp string, vals []string) {
+		t.Helper()
+		eq(exp, gt.Join(vals...))
+	}
+
+	test(``, []string{})
+	test(``, []string{``})
+	test(`/`, []string{`/`})
+	test(`.one`, []string{`.one`})
+	test(`/.one`, []string{`/.one`})
+	test(`one`, []string{`one`})
+	test(`one`, []string{`one/`})
+	test(`/one`, []string{`/one`})
+	test(`/one`, []string{`/one/`})
+	test(`/one`, []string{`/one`})
+
+	for _, one := range pathSegmentsOne {
+		for _, two := range pathSegmentsTwo {
+			for _, three := range pathSegmentsThree {
+				test(`/one/two/three`, []string{`/`, one, two, three})
+			}
+		}
+	}
+}
+
+func TestNullUrl(t *testing.T) {
+	// Delegates to `gt.Join`. We just need to check the basics.
+	t.Run(`WithPath`, func(t *testing.T) {
+		eq(
+			gt.NullUrl{Path: `one/two/three`},
+			gt.NullUrl{Path: `four`}.WithPath(`one`, `two`, `three`),
+		)
+	})
+
 	t.Run(`GoString`, func(t *testing.T) {
 		eq(`gt.NullUrl{}`, fmt.Sprintf(`%#v`, gt.NullUrl{}))
 		eq("gt.ParseNullUrl(`one://two.three/four?five=six#seven`)", fmt.Sprintf(`%#v`, gt.ParseNullUrl(`one://two.three/four?five=six#seven`)))
@@ -350,6 +413,62 @@ func TestTer(t *testing.T) {
 }
 
 func TestRaw(t *testing.T) {
+	t.Run(`Grow`, func(t *testing.T) {
+		prev := gt.Raw(nil)
+
+		eq(0, len(prev))
+		eq(0, cap(prev))
+
+		next := prev.Grow(1)
+		sliceNotShared(prev, next)
+		eq(0, len(next))
+		eq(1, cap(next))
+		prev = next
+
+		next = prev.Grow(11)
+		sliceNotShared(prev, next)
+		eq(0, len(next))
+		eq(13, cap(next))
+		prev = next
+
+		next = prev.Grow(7)
+		sliceShared(prev, next)
+		eq(0, len(next))
+		eq(13, cap(next))
+		prev = next
+
+		next = prev[:1][1:]
+		sliceNotShared(prev, next)
+		eq(0, len(next))
+		eq(12, cap(next))
+		prev = next
+
+		next = prev.Grow(7)
+		sliceShared(prev, next)
+		eq(0, len(next))
+		eq(12, cap(next))
+		prev = next
+
+		next = prev.Grow(11)
+		sliceShared(prev, next)
+		eq(0, len(next))
+		eq(12, cap(next))
+		prev = next
+
+		next = prev.Grow(13)
+		sliceNotShared(prev, next)
+		eq(0, len(next))
+		eq(37, cap(next))
+		prev = next
+
+		next = prev.Grow(0)
+		sliceShared(prev, next)
+		eq(prev, next)
+		eq(0, len(next))
+		eq(37, cap(next))
+		prev = next
+	})
+
 	t.Run(`GoString`, func(t *testing.T) {
 		test := func(exp string, val gt.Raw) {
 			t.Helper()

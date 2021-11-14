@@ -12,6 +12,7 @@ var (
 	errTerNullBool    = fmt.Errorf(`[gt] can't convert ternary null to boolean`)
 	errUnrecLength    = fmt.Errorf(`[gt] unrecognized length`)
 	errDigitEof       = fmt.Errorf(`[gt] expected digit, got %w`, io.EOF)
+	errEmptySegment   = fmt.Errorf(`[gt] unexpected empty URL segment`)
 )
 
 func errParse(ptr *error, src string, typ string) {
@@ -33,4 +34,8 @@ func errJsonString(src []byte, typ interface{}) error {
 
 func errScanType(tar, inp interface{}) error {
 	return fmt.Errorf(`[gt] unrecognized input for type %T: type %T, value %v`, tar, inp, inp)
+}
+
+func errInvalidSegment(val string) error {
+	return fmt.Errorf(`[gt] unexpected invalid URL segment %q`, val)
 }

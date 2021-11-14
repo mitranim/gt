@@ -163,7 +163,30 @@ func (self *Raw) Scan(src interface{}) error {
 // Same as `len(self)`. Handy in edge case scenarios involving embedding.
 func (self Raw) Len() int { return len(self) }
 
-// Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+/*
+Missing feature of the language / standard library. Grows the slice by the given
+additional capacity (not to total capacity), returning a modified version of
+the slice. The returned slice always has the same length as the original, but
+its capacity and backing array may have changed. Similar to
+`(*bytes.Buffer).Grow`, but usable with slices, without requiring wrapping and
+unwrapping.
+*/
+func (self Raw) Grow(size int) Raw {
+	len, cap := len(self), cap(self)
+	if cap-len >= size {
+		return self
+	}
+
+	next := make(Raw, len, 2*cap+size)
+	copy(next, self)
+	return next
+}
+
+/*
+Implement `fmt.GoStringer`, returning valid Go code that constructs this value.
+Assumes that the contents are UTF-8 text that can be represented with a Go
+string.
+*/
 func (self Raw) GoString() string {
 	if self.IsNull() {
 		return `gt.Raw(nil)`

@@ -57,7 +57,7 @@ Allocation-free conversion. Returns a byte slice backed by the provided string.
 Violates memory safety: the resulting value includes one word of arbitrary
 memory following the original string.
 */
-func stringToBytesUnsafe(input string) []byte {
+func stringBytesUnsafe(input string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&input))
 }
 
@@ -171,17 +171,6 @@ func appendIntervalPart(buf []byte, val int, delim byte) []byte {
 	return buf
 }
 
-// This should be part of the language/standard library...
-func growBytes(chunk []byte, size int) []byte {
-	if cap(chunk)-len(chunk) >= size {
-		return chunk
-	}
-
-	buf := bytes.NewBuffer(chunk)
-	buf.Grow(size)
-	return buf.Bytes()
-}
-
 func get(src interface{}) (interface{}, bool) {
 	impl, _ := src.(Getter)
 	if impl != nil {
@@ -218,4 +207,17 @@ func rec(ptr *error) {
 	}
 
 	panic(val)
+}
+
+func noEmptySegment(val string) {
+	if val == `` {
+		panic(errEmptySegment)
+	}
+}
+
+func noRelativeSegment(val string) {
+	if (len(val) >= 2 && val[0] == '.' && val[1] == '.') ||
+		len(val) >= 3 && val[0] == '/' && val[1] == '.' && val[2] == '.' {
+		panic(errInvalidSegment(val))
+	}
 }

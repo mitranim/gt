@@ -139,7 +139,7 @@ func (self NullDate) Append(buf []byte) []byte {
 	}
 
 	// `time.Time.AppendFormat` doesn't seem to do this.
-	buf = growBytes(buf, dateStrLen)
+	buf = Raw(buf).Grow(dateStrLen)
 
 	return self.TimeUTC().AppendFormat(buf, dateFormat)
 }

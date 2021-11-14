@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"net/url"
+	"path"
 )
 
 /*
@@ -76,7 +77,7 @@ func (self NullUrl) String() string {
 	if self.IsNull() {
 		return ``
 	}
-	return self.UrlPtr().String()
+	return self.Url().String()
 }
 
 /*
@@ -211,34 +212,37 @@ func (self *NullUrl) Scan(src interface{}) error {
 }
 
 // Free cast to `*url.URL`.
-func (self *NullUrl) UrlPtr() *url.URL { return (*url.URL)(self) }
+func (self *NullUrl) Url() *url.URL { return (*url.URL)(self) }
 
 // If zero, returns nil. Otherwise returns a non-nil `*url.URL`.
-func (self NullUrl) MaybeUrl() *url.URL {
+func (self NullUrl) Maybe() *url.URL {
 	if self.IsNull() {
 		return nil
 	}
-	return self.UrlPtr()
+	return self.Url()
 }
 
-// Returns modified variant with replaced `.Path`.
-func (self NullUrl) WithPath(val string) NullUrl {
-	self.Path = val
+/*
+Returns a modified variant where `.Path` is replaced by combining the segments
+via `gt.Join`. See the docs on `gt.Join`.
+*/
+func (self NullUrl) WithPath(vals ...string) NullUrl {
+	self.Path = Join(vals...)
 	return self
 }
 
-// Returns modified variant with replaced `.RawQuery`.
+// Returns a modified variant with replaced `.RawQuery`.
 func (self NullUrl) WithRawQuery(val string) NullUrl {
 	self.RawQuery = val
 	return self
 }
 
-// Returns modified variant with replaced `.RawQuery` encoded from input.
+// Returns a modified variant with replaced `.RawQuery` encoded from input.
 func (self NullUrl) WithQuery(val url.Values) NullUrl {
 	return self.WithRawQuery(val.Encode())
 }
 
-// Returns modified variant with replaced `.Fragment`.
+// Returns a modified variant with replaced `.Fragment`.
 func (self NullUrl) WithFragment(val string) NullUrl {
 	self.Fragment = val
 	return self
@@ -252,37 +256,76 @@ func (self NullUrl) GoString() string {
 	return "gt.ParseNullUrl(`" + self.String() + "`)"
 }
 
-// `NullUrl` version of `*url.URL.EscapedPath`.
-func (self NullUrl) EscapedPath() string { return self.UrlPtr().EscapedPath() }
+// `gt.NullUrl` version of `(*url.URL).EscapedPath`.
+func (self NullUrl) EscapedPath() string { return self.Url().EscapedPath() }
 
-// `NullUrl` version of `*url.URL.EscapedFragment`.
-func (self NullUrl) EscapedFragment() string { return self.UrlPtr().EscapedFragment() }
+// `gt.NullUrl` version of `(*url.URL).EscapedFragment`.
+func (self NullUrl) EscapedFragment() string { return self.Url().EscapedFragment() }
 
-// `NullUrl` version of `*url.URL.Redacted`.
-func (self NullUrl) Redacted() string { return self.UrlPtr().Redacted() }
+// `gt.NullUrl` version of `(*url.URL).Redacted`.
+func (self NullUrl) Redacted() string { return self.Url().Redacted() }
 
-// `NullUrl` version of `*url.URL.IsAbs`.
-func (self NullUrl) IsAbs() bool { return self.UrlPtr().IsAbs() }
+// `gt.NullUrl` version of `(*url.URL).IsAbs`.
+func (self NullUrl) IsAbs() bool { return self.Url().IsAbs() }
 
-// `NullUrl` version of `*url.URL.Parse`.
+// `gt.NullUrl` version of `(*url.URL).Parse`.
 func (self NullUrl) ParseIn(ref string) (NullUrl, error) {
-	val, err := self.UrlPtr().Parse(ref)
+	val, err := self.Url().Parse(ref)
 	return ToNullUrl(val), err
 }
 
-// `NullUrl` version of `*url.URL.ResolveReference`.
+// `gt.NullUrl` version of `(*url.URL).ResolveReference`.
 func (self NullUrl) ResolveReference(ref NullUrl) NullUrl {
-	return ToNullUrl(self.UrlPtr().ResolveReference(ref.UrlPtr()))
+	return ToNullUrl(self.Url().ResolveReference(ref.Url()))
 }
 
-// `NullUrl` version of `*url.URL.Query`.
-func (self NullUrl) Query() url.Values { return self.UrlPtr().Query() }
+// `gt.NullUrl` version of `(*url.URL).Query`.
+func (self NullUrl) Query() url.Values { return self.Url().Query() }
 
-// `NullUrl` version of `*url.URL.RequestURI`.
-func (self NullUrl) RequestURI() string { return self.UrlPtr().RequestURI() }
+// `gt.NullUrl` version of `(*url.URL).RequestURI`.
+func (self NullUrl) RequestURI() string { return self.Url().RequestURI() }
 
-// `NullUrl` version of `*url.URL.Hostname`.
-func (self NullUrl) Hostname() string { return self.UrlPtr().Hostname() }
+// `gt.NullUrl` version of `(*url.URL).Hostname`.
+func (self NullUrl) Hostname() string { return self.Url().Hostname() }
 
-// `NullUrl` version of `*url.URL.Port`.
-func (self NullUrl) Port() string { return self.UrlPtr().Port() }
+// `gt.NullUrl` version of `(*url.URL).Port`.
+func (self NullUrl) Port() string { return self.Url().Port() }
+
+/*
+Like `path.Join` but with safeguards. Used internally by `gr.NullUrl.WithPath`,
+exported because it may be useful separately. Differences:
+
+	* More efficient if there's only 1 segment.
+
+	* Panics if len > 1 and any segment is "".
+
+	* Panics if any segment begins with ".." or "/..".
+
+Combining segments of a URL path is usually done when building a URL for a
+request. Accidentally calling the wrong endpoint can have consequences much
+more annoying than a panic during request building.
+*/
+func Join(vals ...string) string {
+	switch len(vals) {
+	case 0:
+		return ``
+
+	case 1:
+		val := vals[0]
+
+		// `path.Clean` would return "." in this case.
+		if val == `` {
+			return val
+		}
+
+		noRelativeSegment(val)
+		return path.Clean(val)
+
+	default:
+		for _, val := range vals {
+			noEmptySegment(val)
+			noRelativeSegment(val)
+		}
+		return path.Join(vals...)
+	}
+}

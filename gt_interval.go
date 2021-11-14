@@ -114,7 +114,7 @@ func (self Interval) Append(buf []byte) []byte {
 		return append(buf, zeroInterval...)
 	}
 
-	buf = growBytes(buf, self.bufLen())
+	buf = Raw(buf).Grow(self.bufLen())
 	buf = append(buf, 'P')
 	buf = appendIntervalPart(buf, self.Years, 'Y')
 	buf = appendIntervalPart(buf, self.Months, 'M')

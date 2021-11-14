@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// `NullTime` version of `time.Date`.
+// `gt.NullTime` version of `time.Date`.
 func NullTimeIn(year int, month time.Month, day, hour, min, sec, nsec int, loc *time.Location) NullTime {
 	return NullTime(time.Date(year, month, day, hour, min, sec, nsec, loc))
 }
@@ -38,10 +38,10 @@ func NullDateUTC(year int, month time.Month, day int) NullTime {
 	return NullDateIn(year, month, day, time.UTC)
 }
 
-// `NullTime` version of `time.Now`.
+// `gt.NullTime` version of `time.Now`.
 func NullTimeNow() NullTime { return NullTime(time.Now()) }
 
-// `NullTime` version of `time.Since`.
+// `gt.NullTime` version of `time.Since`.
 func NullTimeSince(val NullTime) time.Duration { return NullTimeNow().Sub(val) }
 
 /*
@@ -318,7 +318,7 @@ func (self NullTime) AddNullInterval(val NullInterval) NullTime {
 }
 
 /*
-`NullTime` version of `time.Time.After`. Note that while `time.Time{}` is
+`gt.NullTime` version of `time.Time.After`. Note that while `time.Time{}` is
 considered to be the start of the first day of the first month of the first
 year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
 values is zero, this returns false regardless of the other value.
@@ -328,7 +328,7 @@ func (self NullTime) After(val NullTime) bool {
 }
 
 /*
-`NullTime` version of `time.Time.Before`. Note that while `time.Time{}` is
+`gt.NullTime` version of `time.Time.Before`. Note that while `time.Time{}` is
 considered to be the start of the first day of the first month of the first
 year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
 values is zero, this returns false regardless of the other value.
@@ -337,92 +337,92 @@ func (self NullTime) Before(val NullTime) bool {
 	return !self.IsNull() && !val.IsNull() && self.Time().Before(val.Time())
 }
 
-// `NullTime` version of `time.Time.Equal`.
+// `gt.NullTime` version of `time.Time.Equal`.
 func (self NullTime) Equal(val NullTime) bool { return self.Time().Equal(val.Time()) }
 
-// `NullTime` version of `time.Time.Date`.
+// `gt.NullTime` version of `time.Time.Date`.
 func (self NullTime) Date() (int, time.Month, int) { return self.Time().Date() }
 
-// `NullTime` version of `time.Time.Year`.
+// `gt.NullTime` version of `time.Time.Year`.
 func (self NullTime) Year() int { return self.Time().Year() }
 
-// `NullTime` version of `time.Time.Month`.
+// `gt.NullTime` version of `time.Time.Month`.
 func (self NullTime) Month() time.Month { return self.Time().Month() }
 
-// `NullTime` version of `time.Time.Day`.
+// `gt.NullTime` version of `time.Time.Day`.
 func (self NullTime) Day() int { return self.Time().Day() }
 
-// `NullTime` version of `time.Time.Weekday`.
+// `gt.NullTime` version of `time.Time.Weekday`.
 func (self NullTime) Weekday() time.Weekday { return self.Time().Weekday() }
 
-// `NullTime` version of `time.Time.ISOWeek`.
+// `gt.NullTime` version of `time.Time.ISOWeek`.
 func (self NullTime) ISOWeek() (int, int) { return self.Time().ISOWeek() }
 
-// `NullTime` version of `time.Time.Clock`.
+// `gt.NullTime` version of `time.Time.Clock`.
 func (self NullTime) Clock() (int, int, int) { return self.Time().Clock() }
 
-// `NullTime` version of `time.Time.Hour`.
+// `gt.NullTime` version of `time.Time.Hour`.
 func (self NullTime) Hour() int { return self.Time().Hour() }
 
-// `NullTime` version of `time.Time.Minute`.
+// `gt.NullTime` version of `time.Time.Minute`.
 func (self NullTime) Minute() int { return self.Time().Minute() }
 
-// `NullTime` version of `time.Time.Second`.
+// `gt.NullTime` version of `time.Time.Second`.
 func (self NullTime) Second() int { return self.Time().Second() }
 
-// `NullTime` version of `time.Time.Nanosecond`.
+// `gt.NullTime` version of `time.Time.Nanosecond`.
 func (self NullTime) Nanosecond() int { return self.Time().Nanosecond() }
 
-// `NullTime` version of `time.Time.YearDay`.
+// `gt.NullTime` version of `time.Time.YearDay`.
 func (self NullTime) YearDay() int { return self.Time().YearDay() }
 
-// `NullTime` version of `time.Time.Add`.
+// `gt.NullTime` version of `time.Time.Add`.
 func (self NullTime) Add(val time.Duration) NullTime { return NullTime(self.Time().Add(val)) }
 
-// `NullTime` version of `time.Time.Sub`.
+// `gt.NullTime` version of `time.Time.Sub`.
 func (self NullTime) Sub(val NullTime) time.Duration { return self.Time().Sub(val.Time()) }
 
-// `NullTime` version of `time.Time.AddDate`.
+// `gt.NullTime` version of `time.Time.AddDate`.
 func (self NullTime) AddDate(y, m, d int) NullTime { return NullTime(self.Time().AddDate(y, m, d)) }
 
-// `NullTime` version of `time.Time.UTC`.
+// `gt.NullTime` version of `time.Time.UTC`.
 func (self NullTime) UTC() NullTime { return NullTime(self.Time().UTC()) }
 
-// `NullTime` version of `time.Time.Local`.
+// `gt.NullTime` version of `time.Time.Local`.
 func (self NullTime) Local() NullTime { return NullTime(self.Time().Local()) }
 
-// `NullTime` version of `time.Time.In`.
+// `gt.NullTime` version of `time.Time.In`.
 func (self NullTime) In(loc *time.Location) NullTime { return NullTime(self.Time().In(loc)) }
 
-// `NullTime` version of `time.Time.Location`.
+// `gt.NullTime` version of `time.Time.Location`.
 func (self NullTime) Location() *time.Location { return self.Time().Location() }
 
-// `NullTime` version of `time.Time.Zone`.
+// `gt.NullTime` version of `time.Time.Zone`.
 func (self NullTime) Zone() (string, int) { return self.Time().Zone() }
 
-// `NullTime` version of `time.Time.Unix`.
+// `gt.NullTime` version of `time.Time.Unix`.
 func (self NullTime) Unix() int64 { return self.Time().Unix() }
 
-// `NullTime` version of `time.Time.UnixMilli`.
+// `gt.NullTime` version of `time.Time.UnixMilli`.
 func (self NullTime) UnixMilli() int64 { return self.Time().UnixMilli() }
 
-// `NullTime` version of `time.Time.UnixMicro`.
+// `gt.NullTime` version of `time.Time.UnixMicro`.
 func (self NullTime) UnixMicro() int64 { return self.Time().UnixMicro() }
 
-// `NullTime` version of `time.Time.UnixNano`.
+// `gt.NullTime` version of `time.Time.UnixNano`.
 func (self NullTime) UnixNano() int64 { return self.Time().UnixNano() }
 
-// `NullTime` version of `time.Time.IsDST`.
+// `gt.NullTime` version of `time.Time.IsDST`.
 func (self NullTime) IsDST() bool { return self.Time().IsDST() }
 
-// `NullTime` version of `time.Time.Truncate`.
+// `gt.NullTime` version of `time.Time.Truncate`.
 func (self NullTime) Truncate(val time.Duration) NullTime { return NullTime(self.Time().Truncate(val)) }
 
-// `NullTime` version of `time.Time.Round`.
+// `gt.NullTime` version of `time.Time.Round`.
 func (self NullTime) Round(val time.Duration) NullTime { return NullTime(self.Time().Round(val)) }
 
-// `NullTime` version of `time.Time.Format`.
+// `gt.NullTime` version of `time.Time.Format`.
 func (self NullTime) Format(layout string) string { return self.Time().Format(layout) }
 
-// `NullTime` version of `time.Time.AppendFormat`.
+// `gt.NullTime` version of `time.Time.AppendFormat`.
 func (self NullTime) AppendFormat(a []byte, b string) []byte { return self.Time().AppendFormat(a, b) }

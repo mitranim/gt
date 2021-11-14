@@ -1,6 +1,7 @@
 package gt_test
 
 import (
+	"path"
 	"testing"
 
 	"github.com/mitranim/gt"
@@ -67,5 +68,29 @@ func Benchmark_NullInterval_String(b *testing.B) {
 
 	for range counter(b.N) {
 		_ = val.String()
+	}
+}
+
+func Benchmark_path_Join_one(b *testing.B) {
+	for range counter(b.N) {
+		path.Join(`one`)
+	}
+}
+
+func Benchmark_gt_Join_one(b *testing.B) {
+	for range counter(b.N) {
+		gt.Join(`one`)
+	}
+}
+
+func Benchmark_path_Join_many(b *testing.B) {
+	for range counter(b.N) {
+		path.Join(`one`, `two`, `three`)
+	}
+}
+
+func Benchmark_gt_Join_many(b *testing.B) {
+	for range counter(b.N) {
+		gt.Join(`one`, `two`, `three`)
 	}
 }

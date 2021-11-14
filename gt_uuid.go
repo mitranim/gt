@@ -219,7 +219,7 @@ func uuidParseSimple(src string) (val Uuid, err error) {
 		err = errLengthMismatch
 		return
 	}
-	_, err = hex.Decode(val[:], stringToBytesUnsafe(src))
+	_, err = hex.Decode(val[:], stringBytesUnsafe(src))
 	return
 }
 

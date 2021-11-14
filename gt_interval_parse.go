@@ -23,7 +23,7 @@ func (self *Interval) parse(src string) (err error) {
 	defer rec(&err)
 
 	var buf Interval
-	var cur int
+	var cur int // Short for "cursor".
 	var num int
 
 	if !(cur < len(src)) {
@@ -243,5 +243,7 @@ func popPrefixInt(src string, cur int) (int, int) {
 	return (sig * num), cur
 }
 
+// Short for "increment".
 func inc(num int, char byte) int { return (num * 10) + undigit(char) }
-func undigit(char byte) int      { return int(char - '0') }
+
+func undigit(char byte) int { return int(char - '0') }
