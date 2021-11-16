@@ -275,6 +275,42 @@ func TestNullTime(t *testing.T) {
 			gt.NullTimeNow().NullDate(),
 		)
 	})
+
+	t.Run(`Before`, func(t *testing.T) {
+		test := func(exp bool, val gt.NullTime, vals ...gt.NullTime) {
+			eq(exp, val.After(vals...))
+		}
+
+		test(false, gt.NullTime{})
+		test(false, gt.NullTime{}, gt.NullTime{})
+		test(false, gt.NullDateUTC(1, 1, 1))
+		test(true, gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 2))
+		test(true, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
+		test(true, gt.NullDateUTC(1, 1, 4), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullTime{}, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullDateUTC(1, 1, 4), gt.NullTime{}, gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullDateUTC(1, 1, 4), gt.NullDateUTC(1, 1, 3), gt.NullTime{})
+	})
+
+	t.Run(`Before`, func(t *testing.T) {
+		test := func(exp bool, val gt.NullTime, vals ...gt.NullTime) {
+			eq(exp, val.Before(vals...))
+		}
+
+		test(false, gt.NullTime{})
+		test(false, gt.NullTime{}, gt.NullTime{})
+		test(false, gt.NullDateUTC(1, 1, 1))
+		test(true, gt.NullDateUTC(1, 1, 2))
+		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 2))
+		test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3))
+		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 3))
+		test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
+		test(false, gt.NullDateUTC(1, 1, 2), gt.NullTime{}, gt.NullDateUTC(1, 1, 3))
+		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullTime{})
+		test(false, gt.NullTime{}, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
+	})
 }
 
 // TODO: test various invalid inputs.

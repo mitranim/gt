@@ -318,23 +318,51 @@ func (self NullTime) AddNullInterval(val NullInterval) NullTime {
 }
 
 /*
-`gt.NullTime` version of `time.Time.After`. Note that while `time.Time{}` is
-considered to be the start of the first day of the first month of the first
-year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
-values is zero, this returns false regardless of the other value.
+Similar to `time.Time.After`, but variadic. Returns true if ALL given times are
+non-null and ordered sequentially: A > B > C > ...
+
+Note that while `time.Time{}` is considered to be the start of the first day of
+the first month of the first year, `gt.NullTime{}` is considered empty/null. If
+any timestamp is null, this returns false.
 */
-func (self NullTime) After(val NullTime) bool {
-	return !self.IsNull() && !val.IsNull() && self.Time().After(val.Time())
+func (self NullTime) After(vals ...NullTime) bool {
+	cursor := self
+	if cursor.IsNull() {
+		return false
+	}
+
+	for _, val := range vals {
+		if val.IsNull() || !(cursor.Time().After(val.Time())) {
+			return false
+		}
+		cursor = val
+	}
+
+	return true
 }
 
 /*
-`gt.NullTime` version of `time.Time.Before`. Note that while `time.Time{}` is
-considered to be the start of the first day of the first month of the first
-year, `gt.NullTime{}` is considered empty/null. Therefore, if either of the two
-values is zero, this returns false regardless of the other value.
+Similar to `time.Time.Before`, but variadic. Returns true if ALL given times are
+non-null and ordered sequentially: A < B < C < ...
+
+Note that while `time.Time{}` is considered to be the start of the first day of
+the first month of the first year, `gt.NullTime{}` is considered empty/null. If
+any timestamp is null, this returns false.
 */
-func (self NullTime) Before(val NullTime) bool {
-	return !self.IsNull() && !val.IsNull() && self.Time().Before(val.Time())
+func (self NullTime) Before(vals ...NullTime) bool {
+	cursor := self
+	if cursor.IsNull() {
+		return false
+	}
+
+	for _, val := range vals {
+		if val.IsNull() || !(cursor.Time().Before(val.Time())) {
+			return false
+		}
+		cursor = val
+	}
+
+	return true
 }
 
 // `gt.NullTime` version of `time.Time.Equal`.

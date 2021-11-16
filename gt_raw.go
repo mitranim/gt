@@ -168,8 +168,8 @@ Missing feature of the language / standard library. Grows the slice by the given
 additional capacity (not to total capacity), returning a modified version of
 the slice. The returned slice always has the same length as the original, but
 its capacity and backing array may have changed. Similar to
-`(*bytes.Buffer).Grow`, but usable with slices, without requiring wrapping and
-unwrapping.
+`(*bytes.Buffer).Grow` but without wrapping, unwrapping, or spurious escapes
+to the heap.
 */
 func (self Raw) Grow(size int) Raw {
 	len, cap := len(self), cap(self)
