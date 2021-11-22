@@ -175,10 +175,6 @@ func (self Ter) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *Ter) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 

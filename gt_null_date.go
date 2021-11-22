@@ -119,6 +119,7 @@ func (self *NullDate) Parse(src string) error {
 	var val time.Time
 	var err error
 
+	// Too restrictive. TODO fuzzier detection.
 	if len(src) == len(dateFormat) {
 		val, err = time.Parse(dateFormat, src)
 	} else {
@@ -157,10 +158,6 @@ func (self NullDate) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullDate) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 

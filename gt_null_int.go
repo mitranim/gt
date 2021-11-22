@@ -124,10 +124,6 @@ func (self NullInt) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullInt) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 
@@ -256,3 +252,9 @@ func (self *NullInt) Scan(src interface{}) error {
 		return errScanType(self, src)
 	}
 }
+
+/*
+Free cast to the underlying `int64`. Sometimes handy when this type is embedded
+in a struct.
+*/
+func (self NullInt) Int64() int64 { return int64(self) }

@@ -9,7 +9,7 @@ import (
 
 const (
 	timeFormat   = time.RFC3339
-	dateFormat   = "2006-01-02"
+	dateFormat   = `2006-01-02`
 	zeroInterval = `PT0S`
 	UuidLen      = 16
 	UuidStrLen   = UuidLen * 2

@@ -120,10 +120,6 @@ func (self NullUrl) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullUrl) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 

@@ -56,8 +56,8 @@ func ParseNullTime(src string) (val NullTime) {
 /*
 Variant of `time.Time` where zero value is considered empty in text, and null in
 JSON and SQL. Prevents you from accidentally inserting nonsense times like
-0001-01-01 or 1970-01-01 into date/time columns, without the hassle of dealing
-with pointers such as `*time.Time` or unusable types such as `sql.NullTime`.
+0001-01-01 or 1970-01-01 into date/time columns, without the hassle of pointers
+such as `*time.Time` or unusable types such as `sql.NullTime`.
 
 Differences from `time.Time`:
 
@@ -172,10 +172,6 @@ func (self NullTime) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullTime) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 

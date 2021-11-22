@@ -122,11 +122,11 @@ func (self Interval) Append(buf []byte) []byte {
 
 	if self.HasTime() {
 		buf = append(buf, 'T')
+		buf = appendIntervalPart(buf, self.Hours, 'H')
+		buf = appendIntervalPart(buf, self.Minutes, 'M')
+		buf = appendIntervalPart(buf, self.Seconds, 'S')
 	}
 
-	buf = appendIntervalPart(buf, self.Hours, 'H')
-	buf = appendIntervalPart(buf, self.Minutes, 'M')
-	buf = appendIntervalPart(buf, self.Seconds, 'S')
 	return buf
 }
 

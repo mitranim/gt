@@ -52,7 +52,7 @@ Differences from "github.com/google/uuid".UUID:
 
 	* Text encoding uses simplified format without dashes.
 	* Text decoding supports only simplified and canonical format.
-	* Supports only version 4 (mostly-random).
+	* Supports only version 4 (random except for a few bits).
 
 When dealing with databases, it's highly recommended to use `NullUuid` instead.
 */

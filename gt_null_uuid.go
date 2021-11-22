@@ -42,18 +42,18 @@ Differences from `"github.com/google/uuid".UUID`:
 
 	* Text encoding uses simplified format without dashes.
 	* Text decoding supports only simplified and canonical format.
-	* Supports only version 4 (mostly-random).
+	* Supports only version 4 (random except for a few bits).
 	* Zero value is considered empty in text, and null in JSON and SQL.
 
 Differences from `"github.com/google/uuid".NullUUID`:
 
-	* Fewer states. Null is the same as "00000000000000000000000000000000".
-	* Easier to use. `NullUuid` is a type alias of `Uuid`, not a wrapper.
+	* Fewer states: there is NO "00000000000000000000000000000000".
+	* Easier to use: `NullUuid` is a typedef of `Uuid`, not a wrapper.
 
 For database columns, `NullUuid` is recommended over `Uuid`, even when columns
 are non-nullable. It prevents you from accidentally using zero-initialized
-"00000000000000000000000000000000" as a value in SQL or JSON, without the hassle
-of dealing with pointers or additional fields.
+"00000000000000000000000000000000" in SQL or JSON, without the hassle of
+pointers or additional fields.
 */
 type NullUuid Uuid
 
@@ -63,7 +63,7 @@ var (
 )
 
 // Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
-func (self NullUuid) IsZero() bool { return self == NullUuid{} }
+func (self NullUuid) IsZero() bool { return Uuid(self).IsZero() }
 
 // Implement `gt.Nullable`. True if zero.
 func (self NullUuid) IsNull() bool { return self.IsZero() }
@@ -130,10 +130,6 @@ func (self NullUuid) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullUuid) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 
@@ -247,7 +243,7 @@ func (self NullUuid) GoString() string {
 	buf := arr[:0]
 	buf = append(buf, fun...)
 	buf = append(buf, "(`"...)
-	buf = self.Append(buf)
+	buf = Uuid(self).Append(buf) // `NullUuid.Append` would use another zero check.
 	buf = append(buf, "`)"...)
 
 	return string(buf)

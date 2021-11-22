@@ -69,9 +69,9 @@ type PtrGetter interface{ GetPtr() interface{} }
 type Scanner interface{ Scan(interface{}) error }
 
 /*
-Implemented by all types in this package. Various methods implemented on value
-types, rather than pointer types, for converting the value to another
-representation.
+Implemented by all types in this package. Various methods for converting the
+value to another representation. All methods must be implemented on value
+types, rather than pointer types.
 */
 type Encodable interface {
 	Getter
@@ -84,9 +84,9 @@ type Encodable interface {
 }
 
 /*
-Implemented by all types in this package. Various methods implemented on pointer
-types, rather than value types, for mutating the underlying value by decoding
-or zeroing.
+Implemented by all types in this package. Various methods for mutating the
+underlying value by decoding or zeroing. All methods must be implemented on
+pointer types, rather than value types.
 */
 type Decodable interface {
 	Setter

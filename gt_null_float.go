@@ -122,10 +122,6 @@ func (self NullFloat) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
 func (self *NullFloat) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
-		self.Zero()
-		return nil
-	}
 	return self.Parse(bytesString(src))
 }
 
@@ -280,3 +276,9 @@ func (self *NullFloat) Scan(src interface{}) error {
 		return errScanType(self, src)
 	}
 }
+
+/*
+Free cast to the underlying `float64`. Sometimes handy when this type is
+embedded in a struct.
+*/
+func (self NullFloat) Uint64() float64 { return float64(self) }
