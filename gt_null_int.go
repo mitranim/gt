@@ -167,6 +167,8 @@ modifying the receiver. Acceptable inputs:
 	* `*intN`       -> use `.Zero` or convert and assign
 	* `NullInt`     -> assign
 	* `gt.Getter`   -> scan underlying value
+
+TODO also support uints.
 */
 func (self *NullInt) Scan(src interface{}) error {
 	switch src := src.(type) {

@@ -159,5 +159,5 @@ func (self *NullString) Scan(src interface{}) error {
 }
 
 // Same as `len(self)`. Sometimes handy when embedding `gt.NullString` in
-// single-valued structs.
+// single-field structs.
 func (self NullString) Len() int { return len(self) }

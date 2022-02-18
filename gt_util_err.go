@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	errInvalidChar    = fmt.Errorf(`[gt] invalid character`)
-	errFormatMismatch = fmt.Errorf(`[gt] format mismatch`)
-	errLengthMismatch = fmt.Errorf(`[gt] length mismatch`)
+	errInvalidChar    = fmt.Errorf(`invalid character`)
+	errFormatMismatch = fmt.Errorf(`format mismatch`)
+	errLengthMismatch = fmt.Errorf(`length mismatch`)
 	errTerNullBool    = fmt.Errorf(`[gt] can't convert ternary null to boolean`)
-	errUnrecLength    = fmt.Errorf(`[gt] unrecognized length`)
-	errDigitEof       = fmt.Errorf(`[gt] expected digit, got %w`, io.EOF)
+	errUnrecLength    = fmt.Errorf(`unrecognized length`)
+	errDigitEof       = fmt.Errorf(`expected digit, got %w`, io.EOF)
 	errEmptySegment   = fmt.Errorf(`[gt] unexpected empty URL segment`)
 )
 

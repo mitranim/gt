@@ -289,7 +289,7 @@ func (self NullUrl) Port() string { return self.Url().Port() }
 
 /*
 Like `path.Join` but with safeguards. Used internally by `gr.NullUrl.WithPath`,
-exported because it may be useful separately. Differences:
+exported because it may be useful separately. Differences from `path.Join`:
 
 	* More efficient if there's only 1 segment.
 

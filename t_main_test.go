@@ -157,8 +157,6 @@ func jsonBytes(val interface{}) []byte {
 	return tryByteSlice(json.Marshal(val))
 }
 
-func counter(count int) []struct{} { return make([]struct{}, count) }
-
 func list(vals ...interface{}) []interface{} { return vals }
 
 type intervalPart struct {

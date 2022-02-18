@@ -281,4 +281,4 @@ func (self *NullFloat) Scan(src interface{}) error {
 Free cast to the underlying `float64`. Sometimes handy when this type is
 embedded in a struct.
 */
-func (self NullFloat) Uint64() float64 { return float64(self) }
+func (self NullFloat) Float64() float64 { return float64(self) }

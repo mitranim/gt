@@ -28,6 +28,10 @@ func NullTimeUTC(year int, month time.Month, day, hour, min, sec, nsec int) Null
 	return NullTimeIn(year, month, day, hour, min, sec, nsec, time.UTC)
 }
 
+func ClockNullTime(hour, min, sec int) NullTime {
+	return NullTimeUTC(0, 1, 1, hour, min, sec, 0)
+}
+
 /*
 Shortcut for `gt.NullDateIn` in UTC.
 

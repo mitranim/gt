@@ -31,6 +31,8 @@ type Zeroable interface{ IsZero() bool }
 Implemented by all types in this package. For all "null" types, this is
 equivalent to `gt.Zeroable`. For all non-"null" types, this always returns
 `false`.
+
+TODO consider removing from `Encodable` and from non-nullable types.
 */
 type Nullable interface{ IsNull() bool }
 
