@@ -22,9 +22,9 @@ const (
 )
 
 var (
-	bytesNull  = []byte(`null`)
-	bytesFalse = []byte(`false`)
-	bytesTrue  = []byte(`true`)
+	bytesNull  = stringBytesUnsafe(`null`)
+	bytesFalse = stringBytesUnsafe(`false`)
+	bytesTrue  = stringBytesUnsafe(`true`)
 
 	staticFalse = false
 	staticTrue  = true
@@ -33,7 +33,8 @@ var (
 
 	uuidStrZero [UuidStrLen]byte
 
-	charsetDigitDec = new(charset).add(`0123456789`)
+	charsetDigitDec  = new(charset).add(`0123456789`)
+	charsetDigitSign = new(charset).add(`+-`)
 )
 
 func try(err error) {
@@ -186,8 +187,8 @@ type charset [256]bool
 
 func (self *charset) has(val byte) bool { return self[val] }
 
-func (self *charset) add(vals string) *charset {
-	for _, val := range vals {
+func (self *charset) add(val string) *charset {
+	for _, val := range val {
 		self[val] = true
 	}
 	return self
@@ -220,4 +221,24 @@ func noRelativeSegment(val string) {
 		len(val) >= 3 && val[0] == '/' && val[1] == '.' && val[2] == '.' {
 		panic(errInvalidSegment(val))
 	}
+}
+
+func isIntString(val string) bool {
+	if len(val) == 0 {
+		return false
+	}
+
+	if len(val) > 0 && charsetDigitSign.has(val[0]) {
+		val = val[1:]
+	}
+
+	if len(val) == 0 {
+		return false
+	}
+	for ind := 0; ind < len(val); ind++ {
+		if !charsetDigitDec.has(val[ind]) {
+			return false
+		}
+	}
+	return true
 }

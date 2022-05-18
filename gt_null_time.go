@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -144,6 +145,12 @@ func (self *NullTime) Parse(src string) error {
 	if len(src) == 0 {
 		self.Zero()
 		return nil
+	}
+
+	if isIntString(src) {
+		milli, err := strconv.ParseInt(src, 10, 64)
+		*self = NullTime(time.UnixMilli(milli).In(time.UTC))
+		return err
 	}
 
 	val, err := time.Parse(timeFormat, src)

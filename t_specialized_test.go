@@ -211,6 +211,28 @@ func TestInterval(t *testing.T) {
 }
 
 func TestNullTime(t *testing.T) {
+	t.Run(`Parse`, func(t *testing.T) {
+		test := func(exp gt.NullTime, src string) {
+			t.Helper()
+			eq(exp, gt.ParseNullTime(src))
+		}
+
+		test(gt.NullDateUTC(1970, 1, 1), `-0`)
+		test(gt.NullDateUTC(1970, 1, 1), `+0`)
+		test(gt.NullDateUTC(1970, 1, 1), `0`)
+
+		test(gt.NullTime(time.UnixMilli(-1234567890123).In(time.UTC)), `-1234567890123`)
+		test(gt.NullTimeUTC(1930, 11, 18, 0, 28, 29, 877000000), `-1234567890123`)
+
+		test(gt.NullTime(time.UnixMilli(+1234567890123).In(time.UTC)), `+1234567890123`)
+		test(gt.NullTimeUTC(2009, 2, 13, 23, 31, 30, 123000000), `+1234567890123`)
+
+		test(gt.NullTime(time.UnixMilli(1234567890123).In(time.UTC)), `1234567890123`)
+		test(gt.NullTimeUTC(2009, 2, 13, 23, 31, 30, 123000000), `1234567890123`)
+
+		test(gt.NullTimeUTC(1234, 5, 6, 7, 8, 9, 0), `1234-05-06T07:08:09Z`)
+	})
+
 	t.Run(`Before`, func(t *testing.T) {
 		eq(false, gt.NullTime{}.Before(gt.NullTime{}))
 		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullTime{}))

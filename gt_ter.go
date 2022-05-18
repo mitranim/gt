@@ -184,6 +184,8 @@ Implement `json.Marshaler`, using the following representations:
 	* gt.TerNull  = []byte("null")
 	* gt.TerFalse = []byte("false")
 	* gt.TerTrue  = []byte("true")
+
+The returned slices must not be mutated.
 */
 func (self Ter) MarshalJSON() ([]byte, error) {
 	switch self {

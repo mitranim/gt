@@ -117,3 +117,15 @@ func Benchmark_ParseNullUrl(b *testing.B) {
 		gt.ParseNullUrl(`https://user:pass@one.two.three/four/five/six?one=two&one=three&four=five&five=six&seven=eight&nine=ten&nine=eleven#hash`)
 	}
 }
+
+func Benchmark_ParseNullTimeMilli(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		gt.ParseNullTime(`1234567890123`)
+	}
+}
+
+func Benchmark_ParseNullTimeNormal(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		gt.ParseNullTime(`1234-05-06T07:08:09Z`)
+	}
+}
