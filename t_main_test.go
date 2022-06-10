@@ -30,9 +30,9 @@ expected (detailed):
 actual (detailed):
 	%#[2]v
 expected (simple):
-	%[1]s
+	%[1]v
 actual (simple):
-	%[2]s
+	%[2]v
 `, exp, act))
 	}
 }
@@ -43,7 +43,7 @@ func neq(one, other interface{}) {
 unexpected identical values (detailed):
 	%#[1]v
 unexpected identical values (simple):
-	%[1]s
+	%[1]v
 `, one))
 	}
 }

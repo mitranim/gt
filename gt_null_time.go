@@ -29,6 +29,10 @@ func NullTimeUTC(year int, month time.Month, day, hour, min, sec, nsec int) Null
 	return NullTimeIn(year, month, day, hour, min, sec, nsec, time.UTC)
 }
 
+/*
+Creates a UTC timestamp with the given time of day for the first day of the
+Gregorian calendar.
+*/
 func ClockNullTime(hour, min, sec int) NullTime {
 	return NullTimeUTC(0, 1, 1, hour, min, sec, 0)
 }
@@ -56,6 +60,22 @@ error handling is relevant, use `.Parse`.
 func ParseNullTime(src string) (val NullTime) {
 	try(val.Parse(src))
 	return
+}
+
+/*
+True if the timestamps are ordered like this: A < B < C < ....
+Also see `gt.NullTimeLessOrEqual` which uses `<=`.
+*/
+func NullTimeLess(val ...NullTime) bool {
+	return NullTimeOrder(val, NullTime.Less)
+}
+
+/*
+True if the timestamps are ordered like this: A <= B <= C <= ....
+Also see `gt.NullTimeLess` which uses `<`.
+*/
+func NullTimeLessOrEqual(val ...NullTime) bool {
+	return NullTimeOrder(val, NullTime.LessOrEqual)
 }
 
 /*
@@ -325,51 +345,25 @@ func (self NullTime) AddNullInterval(val NullInterval) NullTime {
 }
 
 /*
-Similar to `time.Time.After`, but variadic. Returns true if ALL given times are
-non-null and ordered sequentially: A > B > C > ...
-
-Note that while `time.Time{}` is considered to be the start of the first day of
-the first month of the first year, `gt.NullTime{}` is considered empty/null. If
-any timestamp is null, this returns false.
+Alias for `time.Time.Before`. Also see `gt.NullTime.Before` which is variadic.
 */
-func (self NullTime) After(vals ...NullTime) bool {
-	cursor := self
-	if cursor.IsNull() {
-		return false
-	}
-
-	for _, val := range vals {
-		if val.IsNull() || !(cursor.Time().After(val.Time())) {
-			return false
-		}
-		cursor = val
-	}
-
-	return true
+func (self NullTime) Less(val NullTime) bool {
+	return self.Time().Before(val.Time())
 }
 
-/*
-Similar to `time.Time.Before`, but variadic. Returns true if ALL given times are
-non-null and ordered sequentially: A < B < C < ...
+// Equivalent to `self.Equal(val) || self.Less(val)`.
+func (self NullTime) LessOrEqual(val NullTime) bool {
+	return self.Equal(val) || self.Less(val)
+}
 
-Note that while `time.Time{}` is considered to be the start of the first day of
-the first month of the first year, `gt.NullTime{}` is considered empty/null. If
-any timestamp is null, this returns false.
-*/
-func (self NullTime) Before(vals ...NullTime) bool {
-	cursor := self
-	if cursor.IsNull() {
-		return false
-	}
+// Same as `time.Time.Before`.
+func (self NullTime) Before(val NullTime) bool {
+	return self.Time().Before(val.Time())
+}
 
-	for _, val := range vals {
-		if val.IsNull() || !(cursor.Time().Before(val.Time())) {
-			return false
-		}
-		cursor = val
-	}
-
-	return true
+// Same as `time.Time.After`.
+func (self NullTime) After(val NullTime) bool {
+	return self.Time().After(val.Time())
 }
 
 // `gt.NullTime` version of `time.Time.Equal`.
@@ -461,3 +455,22 @@ func (self NullTime) Format(layout string) string { return self.Time().Format(la
 
 // `gt.NullTime` version of `time.Time.AppendFormat`.
 func (self NullTime) AppendFormat(a []byte, b string) []byte { return self.Time().AppendFormat(a, b) }
+
+/*
+True if the timestamps are ordered in such a way that the given function returns
+true for each subsequent pair. If the function is nil, returns false.
+Otherwise, if length is 0 or 1, returns true.
+*/
+func NullTimeOrder(src []NullTime, fun func(NullTime, NullTime) bool) bool {
+	if fun == nil {
+		return false
+	}
+
+	for len(src) > 1 {
+		if !fun(src[0], src[1]) {
+			return false
+		}
+		src = src[1:]
+	}
+	return true
+}

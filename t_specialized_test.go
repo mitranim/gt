@@ -233,24 +233,6 @@ func TestNullTime(t *testing.T) {
 		test(gt.NullTimeUTC(1234, 5, 6, 7, 8, 9, 0), `1234-05-06T07:08:09Z`)
 	})
 
-	t.Run(`Before`, func(t *testing.T) {
-		eq(false, gt.NullTime{}.Before(gt.NullTime{}))
-		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullTime{}))
-		eq(false, gt.NullTime{}.Before(gt.NullDateUTC(1, 2, 3)))
-		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 3)))
-		eq(false, gt.NullDateUTC(1, 2, 4).Before(gt.NullDateUTC(1, 2, 3)))
-		eq(true, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 4)))
-	})
-
-	t.Run(`After`, func(t *testing.T) {
-		eq(false, gt.NullTime{}.After(gt.NullTime{}))
-		eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullTime{}))
-		eq(false, gt.NullTime{}.After(gt.NullDateUTC(1, 2, 3)))
-		eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 3)))
-		eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 4)))
-		eq(true, gt.NullDateUTC(1, 2, 4).After(gt.NullDateUTC(1, 2, 3)))
-	})
-
 	t.Run(`AddInterval`, func(t *testing.T) {
 		eq(
 			gt.NullDateUTC(5, 7, 9),
@@ -299,40 +281,42 @@ func TestNullTime(t *testing.T) {
 	})
 
 	t.Run(`Before`, func(t *testing.T) {
-		test := func(exp bool, val gt.NullTime, vals ...gt.NullTime) {
-			eq(exp, val.After(vals...))
-		}
-
-		test(false, gt.NullTime{})
-		test(false, gt.NullTime{}, gt.NullTime{})
-		test(false, gt.NullDateUTC(1, 1, 1))
-		test(true, gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 2))
-		test(true, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
-		test(true, gt.NullDateUTC(1, 1, 4), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullTime{}, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullDateUTC(1, 1, 4), gt.NullTime{}, gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullDateUTC(1, 1, 4), gt.NullDateUTC(1, 1, 3), gt.NullTime{})
+		eq(false, gt.NullTime{}.Before(gt.NullTime{}))
+		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullTime{}))
+		eq(true, gt.NullTime{}.Before(gt.NullDateUTC(1, 2, 3)))
+		eq(false, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 3)))
+		eq(false, gt.NullDateUTC(1, 2, 4).Before(gt.NullDateUTC(1, 2, 3)))
+		eq(true, gt.NullDateUTC(1, 2, 3).Before(gt.NullDateUTC(1, 2, 4)))
 	})
 
-	t.Run(`Before`, func(t *testing.T) {
-		test := func(exp bool, val gt.NullTime, vals ...gt.NullTime) {
-			eq(exp, val.Before(vals...))
-		}
-
-		test(false, gt.NullTime{})
-		test(false, gt.NullTime{}, gt.NullTime{})
-		test(false, gt.NullDateUTC(1, 1, 1))
-		test(true, gt.NullDateUTC(1, 1, 2))
-		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 2))
-		test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3))
-		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 3))
-		test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
-		test(false, gt.NullDateUTC(1, 1, 2), gt.NullTime{}, gt.NullDateUTC(1, 1, 3))
-		test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullTime{})
-		test(false, gt.NullTime{}, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
+	t.Run(`After`, func(t *testing.T) {
+		eq(false, gt.NullTime{}.After(gt.NullTime{}))
+		eq(true, gt.NullDateUTC(1, 2, 3).After(gt.NullTime{}))
+		eq(false, gt.NullTime{}.After(gt.NullDateUTC(1, 2, 3)))
+		eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 3)))
+		eq(false, gt.NullDateUTC(1, 2, 3).After(gt.NullDateUTC(1, 2, 4)))
+		eq(true, gt.NullDateUTC(1, 2, 4).After(gt.NullDateUTC(1, 2, 3)))
 	})
+}
+
+func TestNullTimeLess(t *testing.T) {
+	test := func(exp bool, src ...gt.NullTime) {
+		t.Helper()
+		eq(exp, gt.NullTimeLess(src...))
+	}
+
+	test(true, gt.NullTime{})
+	test(false, gt.NullTime{}, gt.NullTime{})
+	test(true, gt.NullDateUTC(1, 1, 1))
+	test(true, gt.NullDateUTC(1, 1, 2))
+	test(true, gt.NullTime{}, gt.NullDateUTC(1, 1, 2))
+	test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 2))
+	test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3))
+	test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 3))
+	test(true, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
+	test(false, gt.NullDateUTC(1, 1, 2), gt.NullTime{}, gt.NullDateUTC(1, 1, 3))
+	test(false, gt.NullDateUTC(1, 1, 2), gt.NullDateUTC(1, 1, 3), gt.NullTime{})
+	test(true, gt.NullTime{}, gt.NullDateUTC(1, 1, 3), gt.NullDateUTC(1, 1, 4))
 }
 
 // TODO: test various invalid inputs.
