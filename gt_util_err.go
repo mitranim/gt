@@ -28,11 +28,11 @@ func errInvalidCharAt(src string, i int) error {
 	return errInvalidChar
 }
 
-func errJsonString(src []byte, typ interface{}) error {
+func errJsonString(src []byte, typ any) error {
 	return fmt.Errorf(`[gt] can't decode %q into %T: expected string`, src, typ)
 }
 
-func errScanType(tar, inp interface{}) error {
+func errScanType(tar, inp any) error {
 	return fmt.Errorf(`[gt] unrecognized input for type %T: type %T, value %v`, tar, inp, inp)
 }
 

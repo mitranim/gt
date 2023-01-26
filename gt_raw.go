@@ -28,7 +28,7 @@ func (self Raw) IsNull() bool { return self.IsZero() }
 Implement `gt.Getter`. If empty, returns `nil`, otherwise returns self as
 `[]byte`.
 */
-func (self Raw) Get() interface{} {
+func (self Raw) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -36,7 +36,7 @@ func (self Raw) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *Raw) Set(src interface{}) { try(self.Scan(src)) }
+func (self *Raw) Set(src any) { try(self.Scan(src)) }
 
 /*
 Implement `gt.Zeroer`, emptying the receiver. If the receiver was non-nil, its
@@ -127,7 +127,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.Raw`                -> assign, replacing the receiver
 	* `gt.Getter`             -> scan underlying value
 */
-func (self *Raw) Scan(src interface{}) error {
+func (self *Raw) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

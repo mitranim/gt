@@ -239,7 +239,7 @@ TODO:
 */
 func TestTer_common(t *testing.T) {
 	var (
-		primZero    = interface{}(nil)
+		primZero    = any(nil)
 		primNonZero = true
 		textZero    = ``
 		textNonZero = `true`
@@ -258,7 +258,7 @@ func TestTer_common(t *testing.T) {
 
 func TestRaw_common(t *testing.T) {
 	var (
-		primZero    = interface{}(nil)
+		primZero    = any(nil)
 		primNonZero = []byte(`{"hello":"world"}`)
 		textZero    = ``
 		textNonZero = `{"hello":"world"}`
@@ -277,7 +277,7 @@ func TestRaw_common(t *testing.T) {
 
 func testAny(
 	t *testing.T,
-	primZero, primNonZero interface{},
+	primZero, primNonZero any,
 	textZero, textNonZero string,
 	jsonZero, jsonNonZero []byte,
 	zero, nonZero gt.Encodable,
@@ -482,7 +482,7 @@ func testScanEmpty(
 	t *testing.T,
 	zero, nonZero gt.Encodable,
 	dec EncodableDecodable,
-	input interface{},
+	input any,
 ) {
 	set(dec, nonZero)
 	eqDeref(nonZero, dec)
@@ -499,7 +499,7 @@ func testScanNonEmpty(
 	t *testing.T,
 	zero, nonZero gt.Encodable,
 	dec EncodableDecodable,
-	input interface{},
+	input any,
 ) {
 	setZero(dec)
 	eq(true, dec.IsZero())

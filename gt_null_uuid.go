@@ -72,7 +72,7 @@ func (self NullUuid) IsNull() bool { return self.IsZero() }
 Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `[16]byte`
 understood by many DB drivers.
 */
-func (self NullUuid) Get() interface{} {
+func (self NullUuid) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -80,7 +80,7 @@ func (self NullUuid) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *NullUuid) Set(src interface{}) { try(self.Scan(src)) }
+func (self *NullUuid) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *NullUuid) Zero() { (*Uuid)(self).Zero() }
@@ -180,7 +180,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.NullUuid`     -> assign
 	* `gt.Getter`       -> scan underlying value
 */
-func (self *NullUuid) Scan(src interface{}) error {
+func (self *NullUuid) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

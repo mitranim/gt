@@ -70,10 +70,10 @@ func (self Uuid) IsZero() bool { return self == Uuid{} }
 func (self Uuid) IsNull() bool { return false }
 
 // Implement `gt.Getter`, returning `[16]byte` understood by many DB drivers.
-func (self Uuid) Get() interface{} { return [UuidLen]byte(self) }
+func (self Uuid) Get() any { return [UuidLen]byte(self) }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *Uuid) Set(src interface{}) { try(self.Scan(src)) }
+func (self *Uuid) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *Uuid) Zero() {
@@ -91,9 +91,9 @@ func (self Uuid) String() string {
 }
 
 /*
-Implement `gt.Parser`, parsing a valid UUID representation. Supports both
-the short format without dashes, and the canonical format with dashes. Parsing
-is case-insensitive.
+Implement `gt.Parser`, parsing a valid UUID representation. Supports the short
+format without dashes and the canonical format with dashes. Parsing is
+case-insensitive.
 */
 func (self *Uuid) Parse(src string) (err error) {
 	defer errParse(&err, src, `UUID`)
@@ -156,7 +156,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.NullUuid`     -> assign
 	* `gt.Getter`       -> scan underlying value
 */
-func (self *Uuid) Scan(src interface{}) error {
+func (self *Uuid) Scan(src any) error {
 	switch src := src.(type) {
 	case string:
 		return self.Parse(src)

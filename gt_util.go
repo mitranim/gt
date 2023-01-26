@@ -78,8 +78,8 @@ func cutJsonStr(val []byte) []byte {
 	return val[1 : len(val)-1]
 }
 
-func hexDecode(a, b byte) (byte, bool) {
-	return ((hexDigits[a] << 4) | hexDigits[b]), (hexBools[a] && hexBools[b])
+func hexDecode(one, two byte) (byte, bool) {
+	return ((hexDigits[one] << 4) | hexDigits[two]), (hexBools[one] && hexBools[two])
 }
 
 var hexDigits = [256]byte{
@@ -172,7 +172,7 @@ func appendIntervalPart(buf []byte, val int, delim byte) []byte {
 	return buf
 }
 
-func get(src interface{}) (interface{}, bool) {
+func get(src any) (any, bool) {
 	impl, _ := src.(Getter)
 	if impl != nil {
 		val := impl.Get()

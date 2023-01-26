@@ -13,12 +13,12 @@ a "primitive" / "well-known" type, such as `int64`, `string`, `time.Time`
 depending on the type. All types in this package use `.Get` to implement
 `sql.Valuer`.
 */
-type Getter interface{ Get() interface{} }
+type Getter interface{ Get() any }
 
 /*
 Implemented by all types in this package. Same as `.Scan`, but panics on error.
 */
-type Setter interface{ Set(interface{}) }
+type Setter interface{ Set(any) }
 
 /*
 Implemented by all types in this package, as well as some stdlib types.
@@ -65,10 +65,10 @@ Unlike other interfaces, not every type in this package implements this. This is
 implemented only by types whose underlying value is built-in (strings and
 numbers) or also supports decoding (`time.Time`).
 */
-type PtrGetter interface{ GetPtr() interface{} }
+type PtrGetter interface{ GetPtr() any }
 
 // Copy of `"database/sql".Scanner` to avoid a big import.
-type Scanner interface{ Scan(interface{}) error }
+type Scanner interface{ Scan(any) error }
 
 /*
 Implemented by all types in this package. Various methods for converting the

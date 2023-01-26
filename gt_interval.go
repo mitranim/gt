@@ -82,10 +82,10 @@ func (self Interval) IsZero() bool { return self == Interval{} }
 func (self Interval) IsNull() bool { return false }
 
 // Implement `gt.Getter`, using `.String` to return a string representation.
-func (self Interval) Get() interface{} { return self.String() }
+func (self Interval) Get() any { return self.String() }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *Interval) Set(src interface{}) { try(self.Scan(src)) }
+func (self *Interval) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *Interval) Zero() {
@@ -169,7 +169,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.NullInterval` -> assign
 	* `gt.Getter`       -> scan underlying value
 */
-func (self *Interval) Scan(src interface{}) error {
+func (self *Interval) Scan(src any) error {
 	switch src := src.(type) {
 	case string:
 		return self.Parse(src)

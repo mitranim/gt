@@ -98,7 +98,7 @@ func (self Ter) IsZero() bool { return self == TerNull }
 func (self Ter) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `bool`.
-func (self Ter) Get() interface{} {
+func (self Ter) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -106,7 +106,7 @@ func (self Ter) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *Ter) Set(src interface{}) { try(self.Scan(src)) }
+func (self *Ter) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *Ter) Zero() {
@@ -234,7 +234,7 @@ modifying the receiver. Acceptable inputs:
 	* `Ter`         -> assign
 	* `gt.Getter`   -> scan underlying value
 */
-func (self *Ter) Scan(src interface{}) error {
+func (self *Ter) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

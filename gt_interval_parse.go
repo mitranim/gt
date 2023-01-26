@@ -23,16 +23,16 @@ func (self *Interval) parse(src string) (err error) {
 	defer rec(&err)
 
 	var buf Interval
-	var cur int // Short for "cursor".
+	var pos int
 	var num int
 
-	if !(cur < len(src)) {
+	if !(pos < len(src)) {
 		panic(io.EOF)
 	}
 
-	switch src[cur] {
+	switch src[pos] {
 	case 'P':
-		cur++
+		pos++
 		goto years
 	default:
 		panic(errFormatMismatch)
@@ -40,30 +40,30 @@ func (self *Interval) parse(src string) (err error) {
 
 years:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		if src[cur] == 'T' {
-			cur++
+		if src[pos] == 'T' {
+			pos++
 			goto hours
 		}
 
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'Y':
-			cur++
+			pos++
 			buf.Years = num
 			goto months
 		case 'M':
-			cur++
+			pos++
 			buf.Months = num
 			goto days
 		case 'D':
-			cur++
+			pos++
 			buf.Days = num
 			goto time
 		default:
@@ -73,26 +73,26 @@ years:
 
 months:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		if src[cur] == 'T' {
-			cur++
+		if src[pos] == 'T' {
+			pos++
 			goto hours
 		}
 
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'M':
-			cur++
+			pos++
 			buf.Months = num
 			goto days
 		case 'D':
-			cur++
+			pos++
 			buf.Days = num
 			goto time
 		default:
@@ -102,22 +102,22 @@ months:
 
 days:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		if src[cur] == 'T' {
-			cur++
+		if src[pos] == 'T' {
+			pos++
 			goto hours
 		}
 
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'D':
-			cur++
+			pos++
 			buf.Days = num
 			goto time
 		default:
@@ -126,36 +126,36 @@ days:
 	}
 
 time:
-	if !(cur < len(src)) {
+	if !(pos < len(src)) {
 		goto done
 	}
-	if src[cur] == 'T' {
-		cur++
+	if src[pos] == 'T' {
+		pos++
 		goto hours
 	}
 	panic(errFormatMismatch)
 
 hours:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'H':
-			cur++
+			pos++
 			buf.Hours = num
 			goto minutes
 		case 'M':
-			cur++
+			pos++
 			buf.Minutes = num
 			goto seconds
 		case 'S':
-			cur++
+			pos++
 			buf.Seconds = num
 			goto eof
 		default:
@@ -165,21 +165,21 @@ hours:
 
 minutes:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'M':
-			cur++
+			pos++
 			buf.Minutes = num
 			goto seconds
 		case 'S':
-			cur++
+			pos++
 			buf.Seconds = num
 			goto eof
 		default:
@@ -189,17 +189,17 @@ minutes:
 
 seconds:
 	{
-		if !(cur < len(src)) {
+		if !(pos < len(src)) {
 			goto done
 		}
-		num, cur = popPrefixInt(src, cur)
-		if !(cur < len(src)) {
+		num, pos = popPrefixInt(src, pos)
+		if !(pos < len(src)) {
 			panic(io.EOF)
 		}
 
-		switch src[cur] {
+		switch src[pos] {
 		case 'S':
-			cur++
+			pos++
 			buf.Seconds = num
 			goto eof
 		default:
@@ -208,7 +208,7 @@ seconds:
 	}
 
 eof:
-	if cur < len(src) {
+	if pos < len(src) {
 		panic(errFormatMismatch)
 	}
 
@@ -217,30 +217,30 @@ done:
 	return nil
 }
 
-func popPrefixInt(src string, cur int) (int, int) {
+func popPrefixInt(src string, pos int) (int, int) {
 	var sig int
 	var num int
 
-	if cur < len(src) && src[cur] == '-' {
-		cur++
+	if pos < len(src) && src[pos] == '-' {
+		pos++
 		sig = -1
 	} else {
 		sig = 1
 	}
 
-	if cur < len(src) && charsetDigitDec.has(src[cur]) {
-		num = undigit(src[cur])
-		cur++
+	if pos < len(src) && charsetDigitDec.has(src[pos]) {
+		num = undigit(src[pos])
+		pos++
 	} else {
 		panic(errDigitEof)
 	}
 
-	for cur < len(src) && charsetDigitDec.has(src[cur]) {
-		num = inc(num, src[cur])
-		cur++
+	for pos < len(src) && charsetDigitDec.has(src[pos]) {
+		num = inc(num, src[pos])
+		pos++
 	}
 
-	return (sig * num), cur
+	return (sig * num), pos
 }
 
 // Short for "increment".

@@ -53,10 +53,10 @@ func (self NullInt) IsZero() bool { return self == 0 }
 func (self NullInt) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*int64`.
-func (self *NullInt) GetPtr() interface{} { return (*int64)(self) }
+func (self *NullInt) GetPtr() any { return (*int64)(self) }
 
 // Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `int64`.
-func (self NullInt) Get() interface{} {
+func (self NullInt) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (self NullInt) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *NullInt) Set(src interface{}) { try(self.Scan(src)) }
+func (self *NullInt) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *NullInt) Zero() {
@@ -170,7 +170,7 @@ modifying the receiver. Acceptable inputs:
 
 TODO also support uints.
 */
-func (self *NullInt) Scan(src interface{}) error {
+func (self *NullInt) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

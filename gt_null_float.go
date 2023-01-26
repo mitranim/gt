@@ -51,10 +51,10 @@ func (self NullFloat) IsZero() bool { return self == 0 }
 func (self NullFloat) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*float64`.
-func (self *NullFloat) GetPtr() interface{} { return (*float64)(self) }
+func (self *NullFloat) GetPtr() any { return (*float64)(self) }
 
 // Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `float64`.
-func (self NullFloat) Get() interface{} {
+func (self NullFloat) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (self NullFloat) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *NullFloat) Set(src interface{}) { try(self.Scan(src)) }
+func (self *NullFloat) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *NullFloat) Zero() {
@@ -168,7 +168,7 @@ modifying the receiver. Acceptable inputs:
 	* `NullFloat`   -> assign
 	* `gt.Getter`   -> scan underlying value
 */
-func (self *NullFloat) Scan(src interface{}) error {
+func (self *NullFloat) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

@@ -126,10 +126,10 @@ func (self NullTime) IsZero() bool { return self.Time().IsZero() }
 func (self NullTime) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*time.Time`.
-func (self *NullTime) GetPtr() interface{} { return self.TimePtr() }
+func (self *NullTime) GetPtr() any { return self.TimePtr() }
 
 // Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `time.Time`.
-func (self NullTime) Get() interface{} {
+func (self NullTime) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -137,7 +137,7 @@ func (self NullTime) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *NullTime) Set(src interface{}) { try(self.Scan(src)) }
+func (self *NullTime) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *NullTime) Zero() {
@@ -159,7 +159,8 @@ func (self NullTime) String() string {
 
 /*
 Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
-requires an RFC3339 timestamp (default time parsing format in Go).
+requires either an RFC3339 timestamp (default time parsing format in Go),
+or a numeric timestamp in milliseconds.
 */
 func (self *NullTime) Parse(src string) error {
 	if len(src) == 0 {
@@ -248,7 +249,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.NullDate` -> assume UTC, convert, assign
 	* `gt.Getter`   -> scan underlying value
 */
-func (self *NullTime) Scan(src interface{}) error {
+func (self *NullTime) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()

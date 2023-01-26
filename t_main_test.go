@@ -22,7 +22,7 @@ var (
 	bytesTrue = []byte(`true`)
 )
 
-func eq(exp, act interface{}) {
+func eq(exp, act any) {
 	if !r.DeepEqual(exp, act) {
 		panic(fmt.Errorf(`
 expected (detailed):
@@ -37,7 +37,7 @@ actual (simple):
 	}
 }
 
-func neq(one, other interface{}) {
+func neq(one, other any) {
 	if r.DeepEqual(one, other) {
 		panic(fmt.Errorf(`
 unexpected identical values (detailed):
@@ -67,19 +67,19 @@ found the following message:
 	}
 }
 
-func funcName(val interface{}) string {
+func funcName(val any) string {
 	return runtime.FuncForPC(r.ValueOf(val).Pointer()).Name()
 }
 
-func catchAny(fun func()) (val interface{}) {
+func catchAny(fun func()) (val any) {
 	defer recAny(&val)
 	fun()
 	return
 }
 
-func recAny(ptr *interface{}) { *ptr = recover() }
+func recAny(ptr *any) { *ptr = recover() }
 
-func eqDeref(exp, ptr interface{}) {
+func eqDeref(exp, ptr any) {
 	eq(exp, r.ValueOf(ptr).Elem().Interface())
 }
 
@@ -139,12 +139,12 @@ func tryByteSlice(val []byte, err error) []byte {
 	return val
 }
 
-func tryInterface(val interface{}, err error) interface{} {
+func tryInterface(val any, err error) any {
 	try(err)
 	return val
 }
 
-func set(ptr, val interface{}) {
+func set(ptr, val any) {
 	r.ValueOf(ptr).Elem().Set(r.ValueOf(val))
 }
 
@@ -153,11 +153,11 @@ func setZero(ptr gt.Zeroable) {
 	eq(true, ptr.IsZero())
 }
 
-func jsonBytes(val interface{}) []byte {
+func jsonBytes(val any) []byte {
 	return tryByteSlice(json.Marshal(val))
 }
 
-func list(vals ...interface{}) []interface{} { return vals }
+func list(vals ...any) []any { return vals }
 
 type intervalPart struct {
 	int

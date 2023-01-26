@@ -75,7 +75,7 @@ func (self NullDate) IsNull() bool { return self.IsZero() }
 Implement `gt.Getter`. If zero, returns `nil`, otherwise uses `.TimeUTC` to
 return a timestamp suitable for SQL encoding.
 */
-func (self NullDate) Get() interface{} {
+func (self NullDate) Get() any {
 	if self.IsNull() {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (self NullDate) Get() interface{} {
 }
 
 // Implement `gt.Setter`, using `.Scan`. Panics on error.
-func (self *NullDate) Set(src interface{}) { try(self.Scan(src)) }
+func (self *NullDate) Set(src any) { try(self.Scan(src)) }
 
 // Implement `gt.Zeroer`, zeroing the receiver.
 func (self *NullDate) Zero() {
@@ -215,7 +215,7 @@ modifying the receiver. Acceptable inputs:
 	* `gt.NullDate` -> assign
 	* `gt.Getter`   -> scan underlying value
 */
-func (self *NullDate) Scan(src interface{}) error {
+func (self *NullDate) Scan(src any) error {
 	switch src := src.(type) {
 	case nil:
 		self.Zero()
