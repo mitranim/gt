@@ -220,10 +220,22 @@ func (self NullUrl) Maybe() *url.URL {
 
 /*
 Returns a modified variant where `.Path` is replaced by combining the segments
-via `gt.Join`. See the docs on `gt.Join`.
+via `gt.Join`. See the docs on `gt.Join`. Also see `.AddPath` that appends to
+the path instead of replacing it.
 */
 func (self NullUrl) WithPath(vals ...string) NullUrl {
 	self.Path = Join(vals...)
+	return self
+}
+
+/*
+Returns a modified variant where `.Path` is replaced by combining the existing
+path with the segments via `gt.Join`. See the docs on `gt.Join`. Also see
+`.WithPath` that replaces the path instead of appending.
+*/
+func (self NullUrl) AddPath(vals ...string) NullUrl {
+	// Suboptimal, TODO tune.
+	self.Path = Join(self.Path, Join(vals...))
 	return self
 }
 

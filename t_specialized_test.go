@@ -402,10 +402,18 @@ func TestJoin_valid(t *testing.T) {
 
 func TestNullUrl(t *testing.T) {
 	// Delegates to `gt.Join`. We just need to check the basics.
+	t.Run(`AddPath`, func(t *testing.T) {
+		eq(
+			gt.NullUrl{Path: `one/two/three/four/five/six`},
+			gt.NullUrl{Path: `one/two/three`}.AddPath(`four`, `five`, `/six`),
+		)
+	})
+
+	// Delegates to `gt.Join`. We just need to check the basics.
 	t.Run(`WithPath`, func(t *testing.T) {
 		eq(
 			gt.NullUrl{Path: `one/two/three`},
-			gt.NullUrl{Path: `four`}.WithPath(`one`, `two`, `three`),
+			gt.NullUrl{Path: `four`}.WithPath(`one`, `two`, `/three`),
 		)
 	})
 
