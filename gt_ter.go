@@ -157,8 +157,8 @@ func (self *Ter) Parse(src string) (err error) {
 	}
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self Ter) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self Ter) AppendTo(buf []byte) []byte {
 	return append(buf, self.String()...)
 }
 
@@ -170,7 +170,7 @@ func (self Ter) MarshalText() ([]byte, error) {
 	if self.IsNull() {
 		return nil, nil
 	}
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.

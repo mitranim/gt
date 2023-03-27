@@ -92,12 +92,12 @@ func (self *NullInterval) Parse(src string) error {
 	return (*Interval)(self).Parse(src)
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self NullInterval) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self NullInterval) AppendTo(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
-	return Interval(self).Append(buf)
+	return Interval(self).AppendTo(buf)
 }
 
 /*

@@ -65,8 +65,8 @@ func (self *Raw) Parse(src string) error {
 	return nil
 }
 
-// Implement `gt.Appender`, appending self to the buffer as-is.
-func (self Raw) Append(buf []byte) []byte { return append(buf, self...) }
+// Implement `gt.AppenderTo`, appending self to the buffer as-is.
+func (self Raw) AppendTo(buf []byte) []byte { return append(buf, self...) }
 
 // Implement `encoding.TextMarhaler`, returning self as-is.
 func (self Raw) MarshalText() ([]byte, error) { return self, nil }

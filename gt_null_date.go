@@ -100,7 +100,7 @@ func (self NullDate) String() string {
 	if self.IsNull() {
 		return ``
 	}
-	return bytesString(self.Append(nil))
+	return bytesString(self.AppendTo(nil))
 }
 
 /*
@@ -133,8 +133,8 @@ func (self *NullDate) Parse(src string) error {
 	return nil
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self NullDate) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self NullDate) AppendTo(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
@@ -153,7 +153,7 @@ func (self NullDate) MarshalText() ([]byte, error) {
 	if self.IsNull() {
 		return nil, nil
 	}
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
@@ -174,7 +174,7 @@ func (self NullDate) MarshalJSON() ([]byte, error) {
 	var arr [dateStrLen + 2]byte
 	buf := arr[:0]
 	buf = append(buf, '"')
-	buf = self.Append(buf)
+	buf = self.AppendTo(buf)
 	buf = append(buf, '"')
 	return buf, nil
 }

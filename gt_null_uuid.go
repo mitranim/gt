@@ -109,12 +109,12 @@ func (self *NullUuid) Parse(src string) error {
 	return (*Uuid)(self).Parse(src)
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self NullUuid) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self NullUuid) AppendTo(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
-	return Uuid(self).Append(buf)
+	return Uuid(self).AppendTo(buf)
 }
 
 /*
@@ -243,7 +243,7 @@ func (self NullUuid) GoString() string {
 	buf := arr[:0]
 	buf = append(buf, fun...)
 	buf = append(buf, "(`"...)
-	buf = Uuid(self).Append(buf) // `NullUuid.Append` would use another zero check.
+	buf = Uuid(self).AppendTo(buf) // `NullUuid.AppendTo` would use another zero check.
 	buf = append(buf, "`)"...)
 
 	return string(buf)

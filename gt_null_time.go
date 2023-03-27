@@ -183,8 +183,8 @@ func (self *NullTime) Parse(src string) error {
 	return nil
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self NullTime) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self NullTime) AppendTo(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
@@ -199,7 +199,7 @@ func (self NullTime) MarshalText() ([]byte, error) {
 	if self.IsNull() {
 		return nil, nil
 	}
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.

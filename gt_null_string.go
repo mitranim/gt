@@ -74,8 +74,8 @@ func (self *NullString) Parse(src string) error {
 	return nil
 }
 
-// Implement `gt.Appender`, appending the string as-is.
-func (self NullString) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, appending the string as-is.
+func (self NullString) AppendTo(buf []byte) []byte {
 	return append(buf, self...)
 }
 
@@ -87,7 +87,7 @@ func (self NullString) MarshalText() ([]byte, error) {
 	if self.IsNull() {
 		return nil, nil
 	}
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, assigning the string as-is.

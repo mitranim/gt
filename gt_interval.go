@@ -102,14 +102,14 @@ func (self Interval) String() string {
 	if self.IsZero() {
 		return zeroInterval
 	}
-	return bytesString(self.Append(nil))
+	return bytesString(self.AppendTo(nil))
 }
 
 // Implement `gt.Parser`, parsing a valid machine-readable ISO 8601 representation.
 func (self *Interval) Parse(src string) error { return self.parse(src) }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self Interval) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self Interval) AppendTo(buf []byte) []byte {
 	if self.IsZero() {
 		return append(buf, zeroInterval...)
 	}
@@ -132,7 +132,7 @@ func (self Interval) Append(buf []byte) []byte {
 
 // Implement `encoding.TextMarhaler`, using the same representation as `.String`.
 func (self Interval) MarshalText() ([]byte, error) {
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.

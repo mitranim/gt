@@ -52,7 +52,7 @@ type Parser interface{ Parse(string) error }
 Implemented by all types in this package, as well as some stdlib types. Appends
 the default text representation of the receiver to the provided buffer.
 */
-type Appender interface{ Append([]byte) []byte }
+type AppenderTo interface{ AppendTo([]byte) []byte }
 
 /*
 Mutable counterpart to `gt.Getter`. Where `.Get` returns an underlying primitive
@@ -94,7 +94,7 @@ type Decodable interface {
 	Setter
 	Zeroer
 	Parser
-	Appender
+	AppenderTo
 	encoding.TextUnmarshaler
 	json.Unmarshaler
 	Scanner

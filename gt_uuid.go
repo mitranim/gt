@@ -87,7 +87,7 @@ Implement `fmt.Stringer`, returning a simplified text representation: lowercase
 without dashes.
 */
 func (self Uuid) String() string {
-	return bytesString(self.Append(nil))
+	return bytesString(self.AppendTo(nil))
 }
 
 /*
@@ -108,8 +108,8 @@ func (self *Uuid) Parse(src string) (err error) {
 	}
 }
 
-// Implement `gt.Appender`, using the same representation as `.String`.
-func (self Uuid) Append(buf []byte) []byte {
+// Implement `gt.AppenderTo`, using the same representation as `.String`.
+func (self Uuid) AppendTo(buf []byte) []byte {
 	buf = append(buf, uuidStrZero[:]...)
 	hex.Encode(buf[len(buf)-len(uuidStrZero):], self[:])
 	return buf
@@ -117,7 +117,7 @@ func (self Uuid) Append(buf []byte) []byte {
 
 // Implement `encoding.TextMarhaler`, using the same representation as `.String`.
 func (self Uuid) MarshalText() ([]byte, error) {
-	return self.Append(nil), nil
+	return self.AppendTo(nil), nil
 }
 
 // Implement `encoding.TextUnmarshaler`, using the same algorithm as `.Parse`.
@@ -258,7 +258,7 @@ func (self Uuid) GoString() string {
 	buf := arr[:0]
 	buf = append(buf, fun...)
 	buf = append(buf, "(`"...)
-	buf = self.Append(buf)
+	buf = self.AppendTo(buf)
 	buf = append(buf, "`)"...)
 
 	return string(buf)
