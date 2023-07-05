@@ -21,9 +21,9 @@ func errParse(ptr *error, src string, typ string) {
 	}
 }
 
-func errInvalidCharAt(src string, i int) error {
-	for _, char := range src[i:] {
-		return fmt.Errorf(`[gt] invalid character %q in position %v`, char, i)
+func errInvalidCharAt(src string, ind int) error {
+	for _, char := range src[ind:] {
+		return fmt.Errorf(`[gt] invalid character %q in position %v`, char, ind)
 	}
 	return errInvalidChar
 }

@@ -39,7 +39,8 @@ func DurationInterval(src time.Duration) (val Interval) {
 
 /*
 Represents an ISO 8601 time interval that has only duration (no timestamps, no
-range).
+range). Supports all six components of ISO 8601 interval: years, months, days,
+hours, minutes, seconds.
 
 Features:
 

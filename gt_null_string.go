@@ -92,6 +92,8 @@ func (self NullString) MarshalText() ([]byte, error) {
 
 // Implement `encoding.TextUnmarshaler`, assigning the string as-is.
 func (self *NullString) UnmarshalText(src []byte) error {
+	// This makes a copy, which is intentional because streaming decoders tend to
+	// reuse one buffer for different content.
 	*self = NullString(src)
 	return nil
 }

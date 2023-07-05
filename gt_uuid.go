@@ -187,11 +187,11 @@ func (self *Uuid) Scan(src any) error {
 
 // Equivalent to `a.String() < b.String()`. Useful for sorting.
 func (self Uuid) Less(other Uuid) bool {
-	for i := range self {
-		if self[i] < other[i] {
+	for ind := range self {
+		if self[ind] < other[ind] {
 			return true
 		}
-		if self[i] > other[i] {
+		if self[ind] > other[ind] {
 			return false
 		}
 	}
@@ -234,13 +234,13 @@ func uuidParseCanon(src string) (val Uuid, err error) {
 		return
 	}
 
-	for i, pair := range uuidGroups {
+	for ind, pair := range uuidGroups {
 		char, ok := hexDecode(src[pair[0]], src[pair[1]])
 		if !ok {
 			err = errInvalidCharAt(src, pair[0])
 			return
 		}
-		val[i] = char
+		val[ind] = char
 	}
 	return
 }

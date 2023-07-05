@@ -207,8 +207,11 @@ func (self *NullUrl) Scan(src any) error {
 	}
 }
 
+// Converts to `*url.URL`. The returned pointer refers to new memory.
+func (self NullUrl) Url() *url.URL { return (*url.URL)(&self) }
+
 // Free cast to `*url.URL`.
-func (self *NullUrl) Url() *url.URL { return (*url.URL)(self) }
+func (self *NullUrl) UrlPtr() *url.URL { return (*url.URL)(self) }
 
 // If zero, returns nil. Otherwise returns a non-nil `*url.URL`.
 func (self NullUrl) Maybe() *url.URL {
