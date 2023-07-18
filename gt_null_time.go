@@ -340,9 +340,22 @@ func (self NullTime) AddInterval(val Interval) NullTime {
 	return self.AddDate(val.Date()).Add(val.OnlyTime().Duration())
 }
 
+/*
+Subtracts the given interval, returning the modified time.
+Inverse of `NullTime.AddInterval`.
+*/
+func (self NullTime) SubInterval(val Interval) NullTime {
+	return self.AddInterval(val.Neg())
+}
+
 // Same as `gt.NullTime.AddInterval` but for `gt.NullInterval`.
 func (self NullTime) AddNullInterval(val NullInterval) NullTime {
 	return self.AddInterval(Interval(val))
+}
+
+// Same as `gt.NullTime.SubInterval` but for `gt.NullInterval`.
+func (self NullTime) SubNullInterval(val NullInterval) NullTime {
+	return self.AddNullInterval(val.Neg())
 }
 
 /*

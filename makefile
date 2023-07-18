@@ -1,5 +1,5 @@
 MAKEFLAGS  := --silent --always-make
-PAR        := $(MAKE) -j 128
+MAKE_PAR   := $(MAKE) -j 128
 VERB       := $(if $(filter $(verb), true), -v,)
 SHORT      := $(if $(filter $(short), true), -short,)
 TEST_FLAGS := -count=1 $(VERB) $(SHORT)
@@ -10,7 +10,7 @@ WATCH      := watchexec -r -c -d=0 -n
 default: test_w
 
 watch:
-	$(PAR) test_w lint_w
+	$(MAKE_PAR) test_w lint_w
 
 test_w:
 	gow -c -v $(TEST)
@@ -30,3 +30,15 @@ lint_w:
 lint:
 	golangci-lint run
 	echo [lint] ok
+
+prep:
+	$(MAKE_PAR) test lint
+
+# Example: `make release tag=v0.0.1`.
+release: prep
+ifeq ($(tag),)
+	$(error missing tag)
+endif
+	git pull --ff-only
+	git show-ref --tags --quiet "$(tag)" || git tag "$(tag)"
+	git push origin $$(git symbolic-ref --short HEAD) "$(tag)"
