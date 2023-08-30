@@ -312,17 +312,16 @@ Inverse of `gt.BoolPtrTer`. Converts to a boolean pointer:
 	* gt.TerNull  = nil
 	* gt.TerFalse = &false
 	* gt.TerTrue  = &true
-
-The returned values are statically allocated and must never be modified.
 */
 func (self Ter) BoolPtr() *bool {
 	switch self {
 	case TerNull:
 		return nil
 	case TerFalse:
-		return ptrFalse
+		return new(bool)
 	case TerTrue:
-		return ptrTrue
+		out := true
+		return &out
 	default:
 		panic(self.invalid())
 	}

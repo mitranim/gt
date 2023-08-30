@@ -26,11 +26,6 @@ var (
 	bytesFalse = stringBytesUnsafe(`false`)
 	bytesTrue  = stringBytesUnsafe(`true`)
 
-	staticFalse = false
-	staticTrue  = true
-	ptrFalse    = &staticFalse
-	ptrTrue     = &staticTrue
-
 	uuidStrZero [UuidStrLen]byte
 
 	charsetDigitDec  = new(charset).add(`0123456789`)
@@ -45,21 +40,25 @@ func try(err error) {
 
 /*
 Allocation-free conversion. Reinterprets a byte slice as a string. Borrowed from
-the standard library. Reasonably safe. Should not be used when the underlying
-byte array is volatile, for example when it's part of a scratch buffer during
-SQL scanning.
+the standard library. Should not be used when the underlying byte array is
+volatile, for example when it's part of a scratch buffer during SQL scanning.
 */
-func bytesString(input []byte) string {
-	return *(*string)(unsafe.Pointer(&input))
+func bytesString(src []byte) string {
+	return *(*string)(unsafe.Pointer(&src))
 }
 
 /*
 Allocation-free conversion. Returns a byte slice backed by the provided string.
-Violates memory safety: the resulting value includes one word of arbitrary
-memory following the original string.
+If the string is backed by read-only memory, attempting to mutate the output
+may cause a segfault panic.
+
+In Go 1.20 this can be written in a marginally "safer" way.
+TODO update if we ever raise the required language version:
+
+	unsafe.Slice(unsafe.StringData(src), len(src))
 */
-func stringBytesUnsafe(input string) []byte {
-	return *(*[]byte)(unsafe.Pointer(&input))
+func stringBytesUnsafe(src string) []byte {
+	return *(*[]byte)(unsafe.Pointer(&src))
 }
 
 /*
