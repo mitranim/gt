@@ -2,6 +2,6 @@
 !/*ignore
 !/go.mod
 !/*.go
-!/*.md
+!/readme.md
 !/makefile
 !/unlicense

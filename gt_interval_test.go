@@ -22,7 +22,7 @@ func TestDurationInterval(t *testing.T) {
 }
 
 func TestInterval(t *testing.T) {
-	t.Run(`Parse invalid`, func(t *testing.T) {
+	t.Run(`Parse_invalid`, func(t *testing.T) {
 		test := func(src string) {
 			t.Helper()
 			fail(new(gt.Interval).Parse(src))

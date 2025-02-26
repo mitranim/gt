@@ -1,16 +1,18 @@
-MAKEFLAGS  := --silent --always-make
-MAKE_PAR   := $(MAKE) -j 128
-VERB       := $(if $(filter $(verb), true), -v,)
-SHORT      := $(if $(filter $(short), true), -short,)
-TEST_FLAGS := -count=1 $(VERB) $(SHORT)
-TEST       := test $(TEST_FLAGS) -timeout=8s -run=$(run)
-BENCH      := test $(TEST_FLAGS) -run=- -bench=$(or $(run),.) -benchmem -benchtime=128ms
-WATCH      := watchexec -r -c -d=0 -n
+MAKEFLAGS := --silent --always-make
+MAKE_CONC := $(MAKE) -j 128 -f $(lastword $(MAKEFILE_LIST)) clear=$(or $(clear),false)
+VERB := $(if $(filter true,$(verb)),-v,)
+FAIL := $(if $(filter false,$(fail)),,-failfast)
+SHORT := $(if $(filter true,$(short)),-short,)
+CLEAR := $(if $(filter false,$(clear)),,-c)
+TEST_FLAGS := $(GO_FLAGS) -count=1 $(VERB) $(FAIL) $(SHORT)
+TEST := test $(TEST_FLAGS) -timeout=1s -run=$(run)
+BENCH := test $(TEST_FLAGS) -run=- -bench=$(or $(run),.) -benchmem -benchtime=128ms
+WATCH := watchexec -r $(CLEAR) -d=0 -n
 
 default: test_w
 
 watch:
-	$(MAKE_PAR) test_w lint_w
+	$(MAKE_CONC) test_w lint_w
 
 test_w:
 	gow -c -v $(TEST)
@@ -32,7 +34,7 @@ lint:
 	echo [lint] ok
 
 prep:
-	$(MAKE_PAR) test lint
+	$(MAKE_CONC) test lint
 
 # Example: `make release tag=v0.0.1`.
 release: prep

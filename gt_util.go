@@ -132,10 +132,13 @@ var hexBools = [256]bool{
 }
 
 func intStrLen(val int) (out int) {
+	if val == 0 {
+		return 1
+	}
 	if val < 0 {
 		out += 1
 	}
-	for val > 0 {
+	for val != 0 {
 		val /= 10
 		out++
 	}
