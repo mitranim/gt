@@ -129,3 +129,48 @@ func Benchmark_ParseNullTimeNormal(b *testing.B) {
 		gt.ParseNullTime(`1234-05-06T07:08:09Z`)
 	}
 }
+
+func Benchmark_NullTime_MarshalJSON(b *testing.B) {
+	val := gt.ParseNullTime(`1234-05-06T07:08:09Z`)
+	b.ResetTimer()
+
+	for ind := 0; ind < b.N; ind++ {
+		_, _ = val.MarshalJSON()
+	}
+}
+
+func Benchmark_NullInterval_MarshalJSON(b *testing.B) {
+	val := gt.ParseNullInterval(`P12Y23M34DT45H56M67S`)
+	b.ResetTimer()
+
+	for ind := 0; ind < b.N; ind++ {
+		_, _ = val.MarshalJSON()
+	}
+}
+
+func Benchmark_NullInt_MarshalJSON(b *testing.B) {
+	val := gt.ParseNullInt(`123456789`)
+	b.ResetTimer()
+
+	for ind := 0; ind < b.N; ind++ {
+		_, _ = val.MarshalJSON()
+	}
+}
+
+func Benchmark_NullString_MarshalJSON(b *testing.B) {
+	val := gt.NullString(`P12Y23M34DT45H56M67S`)
+	b.ResetTimer()
+
+	for ind := 0; ind < b.N; ind++ {
+		_, _ = val.MarshalJSON()
+	}
+}
+
+func Benchmark_NullUrl_MarshalJSON(b *testing.B) {
+	val := gt.ParseNullUrl(`one://two.three:123/four?five#six`)
+	b.ResetTimer()
+
+	for ind := 0; ind < b.N; ind++ {
+		_, _ = val.MarshalJSON()
+	}
+}

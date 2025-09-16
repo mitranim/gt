@@ -2,7 +2,6 @@ package gt
 
 import (
 	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -44,9 +43,9 @@ hours, minutes, seconds.
 
 Features:
 
-	* Reversible encoding/decoding in text.
-	* Reversible encoding/decoding in JSON.
-	* Reversible encoding/decoding in SQL.
+  - Reversible encoding/decoding in text.
+  - Reversible encoding/decoding in JSON.
+  - Reversible encoding/decoding in SQL.
 
 Text encoding and decoding uses the standard ISO 8601 format:
 
@@ -57,8 +56,8 @@ to always output them in the standard ISO 8601 format.
 
 Limitations:
 
-	* Supports only the standard machine-readable format.
-	* Doesn't support decimal fractions.
+  - Supports only the standard machine-readable format.
+  - Doesn't support decimal fractions.
 
 For a nullable variant, see `gt.NullInterval`.
 */
@@ -141,9 +140,16 @@ func (self *Interval) UnmarshalText(src []byte) error {
 	return self.Parse(bytesString(src))
 }
 
-// Implement `json.Marshaler`, using the same representation as `.String`.
+/*
+Implement `json.Marshaler`, returning bytes representing a JSON string with the
+same text as in `.String`.
+*/
 func (self Interval) MarshalJSON() ([]byte, error) {
-	return json.Marshal(self.Get())
+	buf := make([]byte, 0, self.bufLen()+2)
+	buf = append(buf, '"')
+	buf = self.AppendTo(buf)
+	buf = append(buf, '"')
+	return buf, nil
 }
 
 // Implement `json.Unmarshaler`, using the same algorithm as `.Parse`.
@@ -163,12 +169,12 @@ func (self Interval) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.Interval` and
 modifying the receiver. Acceptable inputs:
 
-	* `string`          -> use `.Parse`
-	* `[]byte`          -> use `.UnmarshalText`
-	* `time.Duration`   -> use `.SetDuration`
-	* `gt.Interval`     -> assign
-	* `gt.NullInterval` -> assign
-	* `gt.Getter`       -> scan underlying value
+  - `string`          -> use `.Parse`
+  - `[]byte`          -> use `.UnmarshalText`
+  - `time.Duration`   -> use `.SetDuration`
+  - `gt.Interval`     -> assign
+  - `gt.NullInterval` -> assign
+  - `gt.Getter`       -> scan underlying value
 */
 func (self *Interval) Scan(src any) error {
 	switch src := src.(type) {

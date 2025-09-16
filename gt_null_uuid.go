@@ -32,23 +32,23 @@ func ParseNullUuid(src string) (val NullUuid) {
 Variant of `gt.Uuid` where zero value is considered empty in text, and null in
 JSON and SQL. Features:
 
-	* Reversible encoding/decoding in text. Zero value is "".
-	* Reversible encoding/decoding in JSON. Zero value is `null`.
-	* Reversible encoding/decoding in SQL. Zero value is `null`.
-	* Text encoding uses simplified format without dashes.
-	* Text decoding supports formats with and without dashes, case-insensitive.
+  - Reversible encoding/decoding in text. Zero value is "".
+  - Reversible encoding/decoding in JSON. Zero value is `null`.
+  - Reversible encoding/decoding in SQL. Zero value is `null`.
+  - Text encoding uses simplified format without dashes.
+  - Text decoding supports formats with and without dashes, case-insensitive.
 
 Differences from `"github.com/google/uuid".UUID`:
 
-	* Text encoding uses simplified format without dashes.
-	* Text decoding supports only simplified and canonical format.
-	* Supports only version 4 (random except for a few bits).
-	* Zero value is considered empty in text, and null in JSON and SQL.
+  - Text encoding uses simplified format without dashes.
+  - Text decoding supports only simplified and canonical format.
+  - Supports only version 4 (random except for a few bits).
+  - Zero value is considered empty in text, and null in JSON and SQL.
 
 Differences from `"github.com/google/uuid".NullUUID`:
 
-	* Fewer states: there is NO "00000000000000000000000000000000".
-	* Easier to use: `NullUuid` is a typedef of `Uuid`, not a wrapper.
+  - Fewer states: there is NO "00000000000000000000000000000000".
+  - Easier to use: `NullUuid` is a typedef of `Uuid`, not a wrapper.
 
 For database columns, `NullUuid` is recommended over `Uuid`, even when columns
 are non-nullable. It prevents you from accidentally using zero-initialized
@@ -102,7 +102,7 @@ requires a valid UUID representation. Supports both the short format without
 dashes, and the canonical format with dashes. Parsing is case-insensitive.
 */
 func (self *NullUuid) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -172,13 +172,13 @@ func (self NullUuid) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullUuid` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`             -> use `.Zero`
-	* `string`          -> use `.Parse`
-	* `[16]byte`        -> assign
-	* `*[16]byte`       -> use `.Zero` or assign
-	* `gt.Uuid`         -> assign
-	* `gt.NullUuid`     -> assign
-	* `gt.Getter`       -> scan underlying value
+  - `nil`             -> use `.Zero`
+  - `string`          -> use `.Parse`
+  - `[16]byte`        -> assign
+  - `*[16]byte`       -> use `.Zero` or assign
+  - `gt.Uuid`         -> assign
+  - `gt.NullUuid`     -> assign
+  - `gt.Getter`       -> scan underlying value
 */
 func (self *NullUuid) Scan(src any) error {
 	switch src := src.(type) {

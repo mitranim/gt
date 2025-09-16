@@ -85,7 +85,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 requires a valid machine-readable ISO 8601 representation.
 */
 func (self *NullInterval) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -155,15 +155,15 @@ func (self NullInterval) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullInterval` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`             -> use `.Zero`
-	* `string`          -> use `.Parse`
-	* `[]byte`          -> use `.UnmarshalText`
-	* `time.Duration`   -> use `.SetDuration`
-	* `*time.Duration`  -> use `.Zero` or `.SetDuration`
-	* `gt.Interval`     -> assign
-	* `*gt.Interval`    -> use `.Zero` or assign
-	* `gt.NullInterval` -> assign
-	* `gt.Getter`       -> scan underlying value
+  - `nil`             -> use `.Zero`
+  - `string`          -> use `.Parse`
+  - `[]byte`          -> use `.UnmarshalText`
+  - `time.Duration`   -> use `.SetDuration`
+  - `*time.Duration`  -> use `.Zero` or `.SetDuration`
+  - `gt.Interval`     -> assign
+  - `*gt.Interval`    -> use `.Zero` or assign
+  - `gt.NullInterval` -> assign
+  - `gt.Getter`       -> scan underlying value
 */
 func (self *NullInterval) Scan(src any) error {
 	switch src := src.(type) {

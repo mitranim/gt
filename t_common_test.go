@@ -233,9 +233,9 @@ func TestUuid_common(t *testing.T) {
 /*
 TODO:
 
-	* Test various invalid inputs.
-	* Ensure all three states are tested.
-	* Test various auxiliary methods.
+  - Test various invalid inputs.
+  - Ensure all three states are tested.
+  - Test various auxiliary methods.
 */
 func TestTer_common(t *testing.T) {
 	var (

@@ -2,7 +2,6 @@ package gt
 
 import (
 	"database/sql/driver"
-	"encoding/json"
 	"net/url"
 	"path"
 )
@@ -26,11 +25,11 @@ func ToNullUrl(src *url.URL) (val NullUrl) {
 Variant of `*url.URL` with a less-atrocious API.
 Differences from `*url.URL`:
 
-	* Used by value, not by pointer.
-	* Full support for text, JSON, SQL encoding/decoding.
-	* Zero value is considered empty in text, and null in JSON and SQL.
-	* Easier to use.
-	* Fewer invalid states.
+  - Used by value, not by pointer.
+  - Full support for text, JSON, SQL encoding/decoding.
+  - Zero value is considered empty in text, and null in JSON and SQL.
+  - Easier to use.
+  - Fewer invalid states.
 */
 type NullUrl url.URL
 
@@ -85,7 +84,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 parses the input using `url.Parse`.
 */
 func (self *NullUrl) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -104,7 +103,18 @@ func (self NullUrl) AppendTo(buf []byte) []byte {
 	if self.IsNull() {
 		return buf
 	}
-	return append(buf, self.String()...)
+
+	buf = Raw(buf).Grow(self.bufLen())
+
+	/**
+	At the time of writing (Go 1.25), `(*url.URL).AppendBinary` simply calls
+	`.String` internally, ignoring the purpose of "append"-style interfaces.
+	They shouldn't even have bothered to implement that. But there's a tiny
+	chance of this being fixed in the future.
+	*/
+	buf, err := self.UrlPtr().AppendBinary(buf)
+	try(err) // Can't fail.
+	return buf
 }
 
 /*
@@ -132,7 +142,18 @@ func (self NullUrl) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.String())
+
+	/**
+	At the time of writing (Go 1.25), `(*url.URL).AppendBinary` simply calls
+	`.String` internally, ignoring the purpose of "append"-style interfaces.
+	They shouldn't even have bothered to implement that. But there's a tiny
+	chance of this being fixed in the future.
+	*/
+	buf := make([]byte, 0, self.bufLen()+2)
+	buf = append(buf, '"')
+	buf, err := self.UrlPtr().AppendBinary(buf)
+	buf = append(buf, '"')
+	return buf, err
 }
 
 /*
@@ -162,13 +183,13 @@ func (self NullUrl) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullUrl` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `url.URL`     -> convert and assign
-	* `*url.URL`    -> use `.Zero` or convert and assign
-	* `NullUrl`     -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `url.URL`     -> convert and assign
+  - `*url.URL`    -> use `.Zero` or convert and assign
+  - `NullUrl`     -> assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *NullUrl) Scan(src any) error {
 	switch src := src.(type) {
@@ -339,14 +360,70 @@ func (self NullUrl) Hostname() string { return self.Url().Hostname() }
 func (self NullUrl) Port() string { return self.Url().Port() }
 
 /*
+Speculative: does not account for effects of URL encoding of non-URL characters,
+which bloats the size and is especially common in the URL query. Additionally,
+we're unable to check the lengths of strings stored in private fields. But this
+should still marginally reduce reallocations in many common cases.
+
+What's annoying is that `(*url.URL).String` then repeats the arithmetic.
+But still worth it, and we don't want to reimplement everything.
+
+TODO write tests.
+*/
+func (self NullUrl) bufLen() (num int) {
+	sch := len(self.Scheme)
+	if sch > 0 {
+		num += sch + len(`:`)
+	}
+
+	opaq := len(self.Opaque)
+	if opaq > 0 {
+		num += opaq
+	} else {
+		host := len(self.Host)
+		num += host
+		if !self.OmitHost || host > 0 || self.User != nil {
+			num += len(`//`)
+		}
+	}
+
+	num += len(self.Path)
+
+	query := len(self.RawQuery)
+	if query > 0 || self.ForceQuery {
+		num += query + len(`?`)
+	}
+
+	frag := len(self.Fragment)
+	if frag > 0 {
+		num += frag + len(`#`)
+	}
+
+	/**
+	Private fields...
+
+		info := self.User
+		if info != nil {
+			num += len(info.username)
+			num += len(info.password)
+			if len(info.password) > 0 || info.passwordSet {
+				num += len(`:`)
+			}
+			num += len(`@`)
+		}
+	*/
+	return
+}
+
+/*
 Like `path.Join` but with safeguards. Used internally by `gr.NullUrl.WithPath`,
 exported because it may be useful separately. Differences from `path.Join`:
 
-	* More efficient if there's only 1 segment.
+  - More efficient if there's only 1 segment.
 
-	* Panics if any segment is "".
+  - Panics if any segment is "".
 
-	* Panics if any segment begins with ".." or "/..".
+  - Panics if any segment begins with ".." or "/..".
 
 Combining segments of a URL path is usually done when building a URL for a
 request. Accidentally calling the wrong endpoint can have consequences much

@@ -19,7 +19,7 @@ var (
 
 // Implement `gt.Zeroable`. Equivalent to `len(self)` == 0. NOT equivalent to
 // `self == nil` or `reflect.ValueOf(self).IsZero()`.
-func (self Raw) IsZero() bool { return len(self) == 0 }
+func (self Raw) IsZero() bool { return len(self) <= 0 }
 
 // Implement `gt.Nullable`. True if empty.
 func (self Raw) IsNull() bool { return self.IsZero() }
@@ -57,7 +57,7 @@ any capacity. Otherwise stores the input as-is, copying it for safety. If the
 receiver had enough capacity, its backing array may be mutated by this.
 */
 func (self *Raw) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -78,7 +78,7 @@ it for safety. If the receiver had enough capacity, its backing array may be
 mutated by this.
 */
 func (self *Raw) UnmarshalText(src []byte) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -119,13 +119,13 @@ func (self Raw) Value() (driver.Value, error) { return self.Get(), nil }
 Implement `sql.Scanner`, converting an arbitrary input to `gt.Raw` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`                   -> use `.Zero`
-	* `string`                -> use `.Parse`
-	* `[]byte`                -> use `.UnmarshalText`
-	* convertible to `string` -> use `.Parse`
-	* convertible to `[]byte` -> use `.UnmarshalText`
-	* `gt.Raw`                -> assign, replacing the receiver
-	* `gt.Getter`             -> scan underlying value
+  - `nil`                   -> use `.Zero`
+  - `string`                -> use `.Parse`
+  - `[]byte`                -> use `.UnmarshalText`
+  - convertible to `string` -> use `.Parse`
+  - convertible to `[]byte` -> use `.UnmarshalText`
+  - `gt.Raw`                -> assign, replacing the receiver
+  - `gt.Getter`             -> scan underlying value
 */
 func (self *Raw) Scan(src any) error {
 	switch src := src.(type) {

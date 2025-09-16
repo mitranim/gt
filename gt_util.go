@@ -66,7 +66,7 @@ Empty input = edge case of calling `.UnmarshalJSON` directly and passing nil or
 `[]byte{}`. Not sure if we care.
 */
 func isJsonEmpty(val []byte) bool {
-	return len(val) == 0 || bytes.Equal(val, bytesNull)
+	return len(val) <= 0 || bytes.Equal(val, bytesNull)
 }
 
 func isJsonStr(val []byte) bool {
@@ -226,7 +226,7 @@ func noRelativeSegment(val string) {
 }
 
 func isIntString(val string) bool {
-	if len(val) == 0 {
+	if len(val) <= 0 {
 		return false
 	}
 
@@ -234,7 +234,7 @@ func isIntString(val string) bool {
 		val = val[1:]
 	}
 
-	if len(val) == 0 {
+	if len(val) <= 0 {
 		return false
 	}
 	for ind := 0; ind < len(val); ind++ {

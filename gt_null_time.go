@@ -86,18 +86,18 @@ such as `*time.Time` or unusable types such as `sql.NullTime`.
 
 Differences from `time.Time`:
 
-	* Zero value is "" in text.
-	* Zero value is `null` in JSON.
-	* Zero value is `null` in SQL.
-	* Default text encoding is RFC3339.
-	* Text encoding/decoding is automatically reversible.
+  - Zero value is "" in text.
+  - Zero value is `null` in JSON.
+  - Zero value is `null` in SQL.
+  - Default text encoding is RFC3339.
+  - Text encoding/decoding is automatically reversible.
 
 Differences from `"database/sql".NullTime`:
 
-	* Much easier to use.
-	* Supports text; zero value is "".
-	* Supports JSON; zero value is `null`.
-	* Fewer states: null and zero are one.
+  - Much easier to use.
+  - Supports text; zero value is "".
+  - Supports JSON; zero value is `null`.
+  - Fewer states: null and zero are one.
 
 In your data model, `time.Time` is often the wrong choice, because the zero
 value of `time.Time` is considered "non-empty". It leads to accidentally
@@ -163,7 +163,7 @@ requires either an RFC3339 timestamp (default time parsing format in Go),
 or a numeric timestamp in milliseconds.
 */
 func (self *NullTime) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -215,7 +215,12 @@ func (self NullTime) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.Get())
+
+	buf := make([]byte, 0, len(timeFormat)+2)
+	buf = append(buf, '"')
+	buf = self.AppendTo(buf)
+	buf = append(buf, '"')
+	return buf, nil
 }
 
 /*
@@ -240,14 +245,14 @@ func (self NullTime) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullTime` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `time.Time`   -> assign
-	* `*time.Time`  -> use `.Zero` or assign
-	* `gt.NullTime` -> assign
-	* `gt.NullDate` -> assume UTC, convert, assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `time.Time`   -> assign
+  - `*time.Time`  -> use `.Zero` or assign
+  - `gt.NullTime` -> assign
+  - `gt.NullDate` -> assume UTC, convert, assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *NullTime) Scan(src any) error {
 	switch src := src.(type) {

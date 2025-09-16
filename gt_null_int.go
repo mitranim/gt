@@ -27,15 +27,15 @@ Unlike `int64`, encoding/decoding is not always reversible:
 
 Differences from `"database/sql".NullInt64`:
 
-	* Much easier to use.
-	* Supports text.
-	* Supports JSON.
-	* Fewer states: null and zero are one.
+  - Much easier to use.
+  - Supports text.
+  - Supports JSON.
+  - Fewer states: null and zero are one.
 
 In your data model, numeric fields should be either:
 
-	* Non-nullable; zero value = 0; use `int64`.
-	* Nullable; zero value = `null`; 0 is not allowed; use `gt.NullInt`.
+  - Non-nullable; zero value = 0; use `int64`.
+  - Nullable; zero value = `null`; 0 is not allowed; use `gt.NullInt`.
 
 Avoid `*intN` or `sql.NullIntN`.
 */
@@ -89,7 +89,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 parses the input using `strconv.ParseInt`.
 */
 func (self *NullInt) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -129,13 +129,13 @@ func (self *NullInt) UnmarshalText(src []byte) error {
 
 /*
 Implement `json.Marshaler`. If zero, returns bytes representing `null`.
-Otherwise uses the default `json.Marshal` behavior for `int64`.
+Otherwise behaves like `.AppendTo`.
 */
 func (self NullInt) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.Get())
+	return self.AppendTo(nil), nil
 }
 
 /*
@@ -160,13 +160,13 @@ func (self NullInt) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullInt` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `intN`        -> convert and assign
-	* `*intN`       -> use `.Zero` or convert and assign
-	* `NullInt`     -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `intN`        -> convert and assign
+  - `*intN`       -> use `.Zero` or convert and assign
+  - `NullInt`     -> assign
+  - `gt.Getter`   -> scan underlying value
 
 TODO also support uints.
 */

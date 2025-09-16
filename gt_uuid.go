@@ -42,17 +42,17 @@ func ParseUuid(src string) (val Uuid) {
 /*
 Simple UUID implementation. Features:
 
-	* Reversible encoding/decoding in text.
-	* Reversible encoding/decoding in JSON.
-	* Reversible encoding/decoding in SQL.
-	* Text encoding uses simplified format without dashes.
-	* Text decoding supports formats with and without dashes, case-insensitive.
+  - Reversible encoding/decoding in text.
+  - Reversible encoding/decoding in JSON.
+  - Reversible encoding/decoding in SQL.
+  - Text encoding uses simplified format without dashes.
+  - Text decoding supports formats with and without dashes, case-insensitive.
 
 Differences from "github.com/google/uuid".UUID:
 
-	* Text encoding uses simplified format without dashes.
-	* Text decoding supports only simplified and canonical format.
-	* Supports only version 4 (random except for a few bits).
+  - Text encoding uses simplified format without dashes.
+  - Text decoding supports only simplified and canonical format.
+  - Supports only version 4 (random except for a few bits).
 
 When dealing with databases, it's highly recommended to use `NullUuid` instead.
 */
@@ -125,7 +125,8 @@ func (self *Uuid) UnmarshalText(src []byte) error {
 	return self.Parse(bytesString(src))
 }
 
-// Implement `json.Marshaler`, using the same representation as `.String`.
+// Implement `json.Marshaler`, returning bytes representing a JSON string with
+// the same text as in `.String`.
 func (self Uuid) MarshalJSON() ([]byte, error) {
 	var buf [UuidStrLen + 2]byte
 	buf[0] = '"'
@@ -149,12 +150,12 @@ func (self Uuid) Value() (driver.Value, error) { return self.Get(), nil }
 Implement `sql.Scanner`, converting an arbitrary input to `gt.Uuid` and
 modifying the receiver. Acceptable inputs:
 
-	* `string`          -> use `.Parse`
-	* `[]byte`          -> use `.UnmarshalText`
-	* `[16]byte`        -> assign
-	* `gt.Uuid`         -> assign
-	* `gt.NullUuid`     -> assign
-	* `gt.Getter`       -> scan underlying value
+  - `string`          -> use `.Parse`
+  - `[]byte`          -> use `.UnmarshalText`
+  - `[16]byte`        -> assign
+  - `gt.Uuid`         -> assign
+  - `gt.NullUuid`     -> assign
+  - `gt.Getter`       -> scan underlying value
 */
 func (self *Uuid) Scan(src any) error {
 	switch src := src.(type) {

@@ -29,10 +29,10 @@ encoding to a string.
 
 Differences from `"database/sql".NullFloat64`:
 
-	* Much easier to use.
-	* Supports text.
-	* Supports JSON.
-	* Fewer states: zero and null are the same.
+  - Much easier to use.
+  - Supports text.
+  - Supports JSON.
+  - Fewer states: zero and null are the same.
 
 Caution: like any floating point number, this should not be used for financial
 columns. Store money as integers or use a specialized decimal type.
@@ -87,7 +87,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 parses the input using `strconv.ParseFloat`.
 */
 func (self *NullFloat) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -127,13 +127,13 @@ func (self *NullFloat) UnmarshalText(src []byte) error {
 
 /*
 Implement `json.Marshaler`. If zero, returns bytes representing `null`.
-Otherwise uses the default `json.Marshal` behavior for `float64`.
+Otherwise behaves like `.AppendTo`.
 */
 func (self NullFloat) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.Get())
+	return self.AppendTo(nil), nil
 }
 
 /*
@@ -158,15 +158,15 @@ func (self NullFloat) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullFloat` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `intN`        -> convert and assign
-	* `*intN`       -> use `.Zero` or convert and assign
-	* `floatN`      -> convert and assign
-	* `*floatN`     -> use `.Zero` or convert and assign
-	* `NullFloat`   -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `intN`        -> convert and assign
+  - `*intN`       -> use `.Zero` or convert and assign
+  - `floatN`      -> convert and assign
+  - `*floatN`     -> use `.Zero` or convert and assign
+  - `NullFloat`   -> assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *NullFloat) Scan(src any) error {
 	switch src := src.(type) {

@@ -17,15 +17,15 @@ Unlike `string`, encoding/decoding is not always reversible:
 
 Differences from `"database/sql".NullString`:
 
-	* Much easier to use.
-	* Supports text.
-	* Supports JSON.
-	* Fewer states: null and empty string are one.
+  - Much easier to use.
+  - Supports text.
+  - Supports JSON.
+  - Fewer states: null and empty string are one.
 
 In your data model, text fields should be either:
 
-	* Non-nullable, zero value = empty string -> use `string`.
-	* Nullable, zero value = `null`, empty string is not allowed -> use `gt.NullString`.
+  - Non-nullable, zero value = empty string -> use `string`.
+  - Nullable, zero value = `null`, empty string is not allowed -> use `gt.NullString`.
 
 Avoid `*string` or `sql.NullString`.
 */
@@ -106,7 +106,12 @@ func (self NullString) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.Get())
+
+	buf := make([]byte, 0, len(self)+2)
+	buf = append(buf, '"')
+	buf = self.AppendTo(buf)
+	buf = append(buf, '"')
+	return buf, nil
 }
 
 /*
@@ -129,11 +134,11 @@ func (self NullString) Value() (driver.Value, error) { return self.Get(), nil }
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullString` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `NullString`  -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `NullString`  -> assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *NullString) Scan(src any) error {
 	switch src := src.(type) {

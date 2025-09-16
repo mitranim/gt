@@ -27,8 +27,8 @@ Unlike `uint64`, encoding/decoding is not always reversible:
 
 In your data model, positive numeric fields should be either:
 
-	* Non-nullable; zero value = 0; use `uint64`.
-	* Nullable; zero value = `null`; 0 is not allowed; use `gt.NullUint`.
+  - Non-nullable; zero value = 0; use `uint64`.
+  - Nullable; zero value = `null`; 0 is not allowed; use `gt.NullUint`.
 
 Avoid `*uintN`.
 */
@@ -82,7 +82,7 @@ Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 parses the input using `strconv.ParseUint`.
 */
 func (self *NullUint) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -122,13 +122,13 @@ func (self *NullUint) UnmarshalText(src []byte) error {
 
 /*
 Implement `json.Marshaler`. If zero, returns bytes representing `null`.
-Otherwise uses the default `json.Marshal` behavior for `uint64`.
+Otherwise behaves like `.AppendTo`.
 */
 func (self NullUint) MarshalJSON() ([]byte, error) {
 	if self.IsNull() {
 		return bytesNull, nil
 	}
-	return json.Marshal(self.Get())
+	return self.AppendTo(nil), nil
 }
 
 /*
@@ -153,13 +153,13 @@ func (self NullUint) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullUint` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `uintN`       -> convert and assign
-	* `*uintN`      -> use `.Zero` or convert and assign
-	* `NullUint`    -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `uintN`       -> convert and assign
+  - `*uintN`      -> use `.Zero` or convert and assign
+  - `NullUint`    -> assign
+  - `gt.Getter`   -> scan underlying value
 
 TODO also support signed ints.
 */

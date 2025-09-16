@@ -43,12 +43,12 @@ Civil date without time. Corresponds to SQL type `date` and HTML input with
 `type="date"`. Zero value is considered empty in text, and null in JSON and
 SQL. Features:
 
-	* Reversible encoding/decoding in text. Zero value is "".
-	* Reversible encoding/decoding in JSON. Zero value is `null`.
-	* Reversible encoding/decoding in SQL. Zero value is `null`.
-	* Text encoding uses the ISO 8601 extended calendar date format: "0001-02-03".
-	* Text decoding supports date-only strings and full RFC3339 timestamps.
-	* Convertible to and from `gt.NullTime`.
+  - Reversible encoding/decoding in text. Zero value is "".
+  - Reversible encoding/decoding in JSON. Zero value is `null`.
+  - Reversible encoding/decoding in SQL. Zero value is `null`.
+  - Text encoding uses the ISO 8601 extended calendar date format: "0001-02-03".
+  - Text decoding supports date-only strings and full RFC3339 timestamps.
+  - Convertible to and from `gt.NullTime`.
 
 Caution: `gt.NullDate{}` or `gt.NullDate{0, 0, 0}` is considered empty/null, but
 when converted to `time.Time` or `gt.NullTime`, it's NOT equivalent to the zero
@@ -107,11 +107,11 @@ func (self NullDate) String() string {
 Implement `gt.Parser`. If the input is empty, zeroes the receiver. Otherwise
 requires an ISO 8601 date representation, one of:
 
-	* Extended calendar date: "2006-01-02"
-	* RFC3339 (default Go timestamp format): "2006-01-02T15:04:05Z07:00"
+  - Extended calendar date: "2006-01-02"
+  - RFC3339 (default Go timestamp format): "2006-01-02T15:04:05Z07:00"
 */
 func (self *NullDate) Parse(src string) error {
-	if len(src) == 0 {
+	if len(src) <= 0 {
 		self.Zero()
 		return nil
 	}
@@ -206,14 +206,14 @@ func (self NullDate) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.NullDate` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `time.Time`   -> use `.SetTime`
-	* `*time.Time`  -> use `.Zero` or `.SetTime`
-	* `gt.NullTime` -> use `.SetTime`
-	* `gt.NullDate` -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `time.Time`   -> use `.SetTime`
+  - `*time.Time`  -> use `.Zero` or `.SetTime`
+  - `gt.NullTime` -> use `.SetTime`
+  - `gt.NullDate` -> assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *NullDate) Scan(src any) error {
 	switch src := src.(type) {
