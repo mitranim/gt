@@ -238,7 +238,7 @@ func (self NullUuid) GoString() string {
 
 	const fun = `gt.ParseNullUuid`
 
-	var arr [len(fun) + len("(`") + len(uuidStrZero) + len("`)")]byte
+	var arr [len(fun) + len("(`") + UuidStrLen + len("`)")]byte
 
 	buf := arr[:0]
 	buf = append(buf, fun...)

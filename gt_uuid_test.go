@@ -7,6 +7,7 @@ import (
 	"github.com/mitranim/gt"
 )
 
+// See `TestUuid_common` for the full test.
 func TestUuid(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq("gt.ParseUuid(`00000000000000000000000000000000`)", fmt.Sprintf(`%#v`, gt.Uuid{}))

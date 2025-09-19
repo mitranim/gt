@@ -28,8 +28,8 @@ func ParseTer(src string) (val Ter) {
 /*
 Converts boolean to ternary:
 
-	* false = gt.TerFalse
-	* true  = gt.TerTrue
+  - false = gt.TerFalse
+  - true  = gt.TerTrue
 
 For inverse conversion, use `gt.Ter.LaxBool` or `gt.Ter.TryBool`.
 */
@@ -43,9 +43,9 @@ func BoolTer(val bool) Ter {
 /*
 Converts boolean pointer to ternary:
 
-	* nil    = gt.TerNull
-	* &false = gt.TerFalse
-	* &true  = gt.TerTrue
+  - nil    = gt.TerNull
+  - &false = gt.TerFalse
+  - &true  = gt.TerTrue
 
 For inverse conversion, use `gt.Ter.BoolPtr`.
 */
@@ -66,23 +66,23 @@ advantages. Has three states with the following representations:
 
 Differences from `bool`:
 
-	* 3 states rather than 2.
-	* Nullable in JSON and SQL.
-	* Zero value is empty/null rather than false.
+  - 3 states rather than 2.
+  - Nullable in JSON and SQL.
+  - Zero value is empty/null rather than false.
 
 Differences from `*bool`:
 
-	* More efficient: 1 byte, no heap indirection, no added GC pressure.
-	* Safer: no nil pointer panics.
-	* Zero value is considered empty in text.
-	* Text encoding/decoding is reversible.
+  - More efficient: 1 byte, no heap indirection, no added GC pressure.
+  - Safer: no nil pointer panics.
+  - Zero value is considered empty in text.
+  - Text encoding/decoding is reversible.
 
 Differences from `sql.NullBool`:
 
-	* More efficient: 1 byte rather than 2.
-	* Much easier to use.
-	* Supports text.
-	* Supports JSON.
+  - More efficient: 1 byte rather than 2.
+  - Much easier to use.
+  - Supports text.
+  - Supports JSON.
 */
 type Ter byte
 
@@ -91,10 +91,10 @@ var (
 	_ = Decodable((*Ter)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
+// Implement `gt.Zeroable`. True if `TerNull`.
 func (self Ter) IsZero() bool { return self == TerNull }
 
-// Implement `gt.Nullable`. True if zero.
+// Implement `gt.Nullable`. True if `TerNull`.
 func (self Ter) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.Getter`. If zero, returns `nil`, otherwise returns `bool`.
@@ -118,9 +118,9 @@ func (self *Ter) Zero() {
 /*
 Implement `fmt.Stringer`, using the following representations:
 
-	* gt.TerNull  = ""
-	* gt.TerFalse = "false"
-	* gt.TerTrue  = "true"
+  - gt.TerNull  = ""
+  - gt.TerFalse = "false"
+  - gt.TerTrue  = "true"
 */
 func (self Ter) String() string {
 	switch self {
@@ -153,7 +153,7 @@ func (self *Ter) Parse(src string) (err error) {
 		*self = TerTrue
 		return nil
 	default:
-		return fmt.Errorf(`[gt] failed to parse ternary: expected empty string, "false", or "true", got %q`, src)
+		return fmt.Errorf(`[gt] unable to parse ternary: expected empty string, "false", or "true", got %q`, src)
 	}
 }
 
@@ -181,9 +181,9 @@ func (self *Ter) UnmarshalText(src []byte) error {
 /*
 Implement `json.Marshaler`, using the following representations:
 
-	* gt.TerNull  = []byte("null")
-	* gt.TerFalse = []byte("false")
-	* gt.TerTrue  = []byte("true")
+  - gt.TerNull  = []byte("null")
+  - gt.TerFalse = []byte("false")
+  - gt.TerTrue  = []byte("true")
 
 The returned slices must not be mutated.
 */
@@ -203,11 +203,11 @@ func (self Ter) MarshalJSON() ([]byte, error) {
 /*
 Implement `json.Unmarshaler`, using the following representations:
 
-	* []byte(nil)     = gt.TerNull
-	* []byte("")      = gt.TerNull
-	* []byte("null")  = gt.TerNull
-	* []byte("false") = gt.TerFalse
-	* []byte("true")  = gt.TerTrue
+  - []byte(nil)     = gt.TerNull
+  - []byte("")      = gt.TerNull
+  - []byte("null")  = gt.TerNull
+  - []byte("false") = gt.TerFalse
+  - []byte("true")  = gt.TerTrue
 */
 func (self *Ter) UnmarshalJSON(src []byte) error {
 	if bytes.Equal(src, bytesNull) {
@@ -226,13 +226,13 @@ func (self Ter) Value() (driver.Value, error) {
 Implement `sql.Scanner`, converting an arbitrary input to `gt.Ter` and
 modifying the receiver. Acceptable inputs:
 
-	* `nil`         -> use `.Zero`
-	* `string`      -> use `.Parse`
-	* `[]byte`      -> use `.UnmarshalText`
-	* `bool`        -> use `.SetBool`
-	* `*bool`       -> use `.SetBoolPtr`
-	* `Ter`         -> assign
-	* `gt.Getter`   -> scan underlying value
+  - `nil`         -> use `.Zero`
+  - `string`      -> use `.Parse`
+  - `[]byte`      -> use `.UnmarshalText`
+  - `bool`        -> use `.SetBool`
+  - `*bool`       -> use `.SetBoolPtr`
+  - `Ter`         -> assign
+  - `gt.Getter`   -> scan underlying value
 */
 func (self *Ter) Scan(src any) error {
 	switch src := src.(type) {
@@ -309,9 +309,9 @@ func (self Ter) TryBool() bool {
 /*
 Inverse of `gt.BoolPtrTer`. Converts to a boolean pointer:
 
-	* gt.TerNull  = nil
-	* gt.TerFalse = &false
-	* gt.TerTrue  = &true
+  - gt.TerNull  = nil
+  - gt.TerFalse = &false
+  - gt.TerTrue  = &true
 */
 func (self Ter) BoolPtr() *bool {
 	switch self {

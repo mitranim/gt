@@ -17,8 +17,8 @@ var (
 	_ = Decodable((*Raw)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `len(self)` == 0. NOT equivalent to
-// `self == nil` or `reflect.ValueOf(self).IsZero()`.
+// Implement `gt.Zeroable`. Equivalent to `len(self)` <= 0.
+// NOT equivalent to `self == nil` or `reflect.ValueOf(self).IsZero()`.
 func (self Raw) IsZero() bool { return len(self) <= 0 }
 
 // Implement `gt.Nullable`. True if empty.

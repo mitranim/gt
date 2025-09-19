@@ -39,10 +39,10 @@ var (
 	_ = Decodable((*NullUint)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
+// Implement `gt.Zeroable`. True if 0.
 func (self NullUint) IsZero() bool { return self == 0 }
 
-// Implement `gt.Nullable`. True if zero.
+// Implement `gt.Nullable`. True if 0.
 func (self NullUint) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*uint64`.

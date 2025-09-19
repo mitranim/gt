@@ -257,7 +257,7 @@ overflow checks. Usage example:
 */
 func (self Interval) Duration() time.Duration {
 	if self.HasDate() {
-		panic(fmt.Errorf(`[gt] failed to convert interval %q to duration: days/months/years can't be converted to nanoseconds`, &self))
+		panic(fmt.Errorf(`[gt] unable to convert interval %q to duration: days/months/years can't be converted to nanoseconds`, &self))
 	}
 	return time.Duration(self.Hours)*time.Hour +
 		time.Duration(self.Minutes)*time.Minute +

@@ -89,7 +89,7 @@ Differences from `time.Time`:
   - Zero value is "" in text.
   - Zero value is `null` in JSON.
   - Zero value is `null` in SQL.
-  - Default text encoding is RFC3339.
+  - Default text encoding is `time.RFC3339Nano`, just like in JSON.
   - Text encoding/decoding is automatically reversible.
 
 Differences from `"database/sql".NullTime`:
@@ -148,7 +148,7 @@ func (self *NullTime) Zero() {
 
 /*
 Implement `fmt.Stringer`. If zero, returns an empty string. Otherwise returns a
-text representation in the RFC3339 format.
+text representation in the `time.RFC3339Nano` format.
 */
 func (self NullTime) String() string {
 	if self.IsNull() {

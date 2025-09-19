@@ -21,6 +21,7 @@ func TestRandomNullUuid(t *testing.T) {
 	neq(gt.RandomNullUuid(), gt.RandomNullUuid())
 }
 
+// See `TestUuid_common`.
 func TestNullUuid(t *testing.T) {
 	t.Run(`GoString`, func(t *testing.T) {
 		eq("gt.NullUuid{}", fmt.Sprintf(`%#v`, gt.NullUuid{}))

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	timeFormat   = time.RFC3339
+	timeFormat   = time.RFC3339Nano
 	dateFormat   = `2006-01-02`
 	zeroInterval = `PT0S`
 	UuidLen      = 16
@@ -19,6 +19,8 @@ const (
 	TODO compute length dynamically, like we do for intervals.
 	*/
 	dateStrLen = len(dateFormat) + 2
+
+	hexUintStrLen = 16
 )
 
 var (
@@ -26,10 +28,10 @@ var (
 	bytesFalse = stringBytesUnsafe(`false`)
 	bytesTrue  = stringBytesUnsafe(`true`)
 
-	uuidStrZero [UuidStrLen]byte
-
 	charsetDigitDec  = new(charset).add(`0123456789`)
 	charsetDigitSign = new(charset).add(`+-`)
+
+	hexUintZeros = [hexUintStrLen]byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
 )
 
 func try(err error) {
@@ -243,4 +245,24 @@ func isIntString(val string) bool {
 		}
 	}
 	return true
+}
+
+/*
+Avoids heap escapes of temporary slice headers passed into `io.Reader.Read`
+calls. The Go compiler is rightfully unable to prove that the header never
+escapes in the _general_ case, and moves it to the heap. But real readers
+don't stash your slice headers somewhere.
+*/
+func bufNoEscape(val []byte) []byte {
+	return *(*[]byte)(noescape(unsafe.Pointer(&val)))
+}
+
+/*
+Borrowed from the standard library. Dangerous tool for performance fine-tuning.
+Hides the pointer from escape analysis.
+*/
+func noescape(src unsafe.Pointer) unsafe.Pointer {
+	out := uintptr(src)
+	//nolint:staticcheck
+	return unsafe.Pointer(out ^ 0)
 }

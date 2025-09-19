@@ -44,10 +44,10 @@ var (
 	_ = Decodable((*NullFloat)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
+// Implement `gt.Zeroable`. True if 0.
 func (self NullFloat) IsZero() bool { return self == 0 }
 
-// Implement `gt.Nullable`. True if zero.
+// Implement `gt.Nullable`. True if 0.
 func (self NullFloat) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*float64`.

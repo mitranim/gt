@@ -20,9 +20,9 @@ func RandomUuid() Uuid {
 
 // Creates a UUID (version 4 variant 1) from bytes from the provided reader.
 func ReadUuid(src io.Reader) (val Uuid, err error) {
-	_, err = io.ReadFull(src, val[:])
+	_, err = io.ReadFull(src, bufNoEscape(val[:]))
 	if err != nil {
-		err = fmt.Errorf(`[gt] failed to read random bytes for UUID: %w`, err)
+		err = fmt.Errorf(`[gt] unable to read random bytes for UUID: %w`, err)
 		return
 	}
 
@@ -110,8 +110,9 @@ func (self *Uuid) Parse(src string) (err error) {
 
 // Implement `gt.AppenderTo`, using the same representation as `.String`.
 func (self Uuid) AppendTo(buf []byte) []byte {
-	buf = append(buf, uuidStrZero[:]...)
-	hex.Encode(buf[len(buf)-len(uuidStrZero):], self[:])
+	var zero [UuidStrLen]byte
+	buf = append(buf, zero[:]...)
+	hex.Encode(buf[len(buf)-UuidStrLen:], self[:])
 	return buf
 }
 
@@ -254,7 +255,7 @@ string instead of using a literal constructor.
 func (self Uuid) GoString() string {
 	const fun = `gt.ParseUuid`
 
-	var arr [len(fun) + len("(`") + len(uuidStrZero) + len("`)")]byte
+	var arr [len(fun) + len("(`") + UuidStrLen + len("`)")]byte
 
 	buf := arr[:0]
 	buf = append(buf, fun...)

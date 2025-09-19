@@ -36,10 +36,10 @@ var (
 	_ = Decodable((*NullString)(nil))
 )
 
-// Implement `gt.Zeroable`. Equivalent to `reflect.ValueOf(self).IsZero()`.
+// Implement `gt.Zeroable`. True if empty.
 func (self NullString) IsZero() bool { return self == `` }
 
-// Implement `gt.Nullable`. True if zero.
+// Implement `gt.Nullable`. True if empty.
 func (self NullString) IsNull() bool { return self.IsZero() }
 
 // Implement `gt.PtrGetter`, returning `*string`.
